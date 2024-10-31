@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.GameController">
+   <children>
+      <BorderPane prefHeight="800.0" prefWidth="1000.0">
+         <top>
+            <Label fx:id="turnLabel" stylesheets="@styles.css" text="Label" BorderPane.alignment="CENTER" />
+         </top>
+         <left>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <children>
+                  <Button fx:id="singlesButton" mnemonicParsing="false" stylesheets="@styles.css" text="Singles" />
+                  <Button id="twoOfAKindButton" fx:id="twoOfAKindButton" mnemonicParsing="false" stylesheets="@styles.css" text="Two of a Kind" />
+                  <Button fx:id="straightsButton" mnemonicParsing="false" stylesheets="@styles.css" text="Straights" />
+                  <Button fx:id="threeOfAKindButton" mnemonicParsing="false" stylesheets="@styles.css" text="Three of a Kind" />
+                  <Button fx:id="fourOfAKindButton" mnemonicParsing="false" stylesheets="@styles.css" text="Four of a Kind" />
+               </children>
+            </VBox>
+         </left>
+         <bottom>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Button id="playButton" fx:id="playButton" mnemonicParsing="false" stylesheets="@styles.css" text="Play" />
+                  <Button fx:id="passButton" mnemonicParsing="false" stylesheets="@styles.css" text="Pass" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </HBox>
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>
