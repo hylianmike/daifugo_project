@@ -7,13 +7,11 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.GameController">
    <children>
       <BorderPane prefHeight="800.0" prefWidth="1000.0">
-         <top>
-            <Label fx:id="turnLabel" stylesheets="@styles.css" text="Label" BorderPane.alignment="CENTER" />
-         </top>
          <left>
             <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <opaqueInsets>
@@ -39,6 +37,33 @@
                </opaqueInsets>
             </HBox>
          </bottom>
+         <top>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label fx:id="turnLabel" stylesheets="@styles.css" text="Blank's Turn" translateX="-200.0">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label text="Deck:">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Label>
+                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                     <padding>
+                        <Insets left="1.0" />
+                     </padding>
+                  </HBox>
+               </children>
+            </HBox>
+         </top>
       </BorderPane>
    </children>
 </AnchorPane>
