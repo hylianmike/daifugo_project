@@ -6,39 +6,36 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.GameController">
+<AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.GameController">
    <children>
-      <BorderPane prefHeight="800.0" prefWidth="1000.0">
+      <BorderPane prefHeight="800.0" prefWidth="1000.0" styleClass="main-border" stylesheets="@styles.css">
          <left>
-            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
+            <VBox alignment="CENTER" prefHeight="500.0" prefWidth="175.0" spacing="30.0" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="singlesButton" mnemonicParsing="false" stylesheets="@styles.css" text="Singles" />
-                  <Button id="twoOfAKindButton" fx:id="twoOfAKindButton" mnemonicParsing="false" stylesheets="@styles.css" text="Two of a Kind" />
-                  <Button fx:id="straightsButton" mnemonicParsing="false" stylesheets="@styles.css" text="Straights" />
-                  <Button fx:id="threeOfAKindButton" mnemonicParsing="false" stylesheets="@styles.css" text="Three of a Kind" />
-                  <Button fx:id="fourOfAKindButton" mnemonicParsing="false" stylesheets="@styles.css" text="Four of a Kind" />
+                  <Button fx:id="viewDeckButton" mnemonicParsing="false" onAction="#viewDeckButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="View Deck">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin></Button>
+                  <Button fx:id="singlesButton" mnemonicParsing="false" onAction="#singlesButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Singles" />
+                  <Button id="twoOfAKindButton" fx:id="twoOfAKindButton" mnemonicParsing="false" onAction="#twoOfAKindButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Two of a Kind" />
+                  <Button fx:id="straightsButton" mnemonicParsing="false" onAction="#straightsButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Straights" />
+                  <Button fx:id="threeOfAKindButton" mnemonicParsing="false" onAction="#threeOfAKindButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Three of a Kind" />
+                  <Button fx:id="fourOfAKindButton" mnemonicParsing="false" onAction="#fourOfAKindButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Four of a Kind" />
                </children>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
             </VBox>
          </left>
-         <bottom>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Button id="playButton" fx:id="playButton" mnemonicParsing="false" stylesheets="@styles.css" text="Play" />
-                  <Button fx:id="passButton" mnemonicParsing="false" stylesheets="@styles.css" text="Pass" />
-               </children>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
-            </HBox>
-         </bottom>
          <top>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0" BorderPane.alignment="CENTER">
                <children>
                   <Label fx:id="turnLabel" stylesheets="@styles.css" text="Blank's Turn" translateX="-200.0">
                      <HBox.margin>
@@ -52,18 +49,30 @@
                      <font>
                         <Font size="32.0" />
                      </font>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
                   </Label>
-                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                     <padding>
-                        <Insets left="1.0" />
-                     </padding>
-                  </HBox>
                </children>
             </HBox>
          </top>
+         <center>
+            <TilePane fx:id="cardTilePane" alignment="CENTER" hgap="10.0" vgap="10.0">
+               <BorderPane.margin>
+                  <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
+               </BorderPane.margin>
+            </TilePane>
+         </center>
+         <bottom>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label fx:id="invalidPlayLabel" />
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
+                     <children>
+                        <Button id="playButton" fx:id="playButton" mnemonicParsing="false" onAction="#playButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Play" />
+                        <Button fx:id="passButton" mnemonicParsing="false" onAction="#passButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Pass" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </bottom>
       </BorderPane>
    </children>
 </AnchorPane>
