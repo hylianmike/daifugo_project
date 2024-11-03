@@ -26,6 +26,8 @@ class GameController : Initializable
     private val suitOrder = listOf("spades", "clubs", "diamonds", "hearts")
 
     private var selectedCard: Card? = null
+    private val selectedPairCards = mutableListOf<Card>()
+
     private val playedCards = mutableListOf<Card>()
     private var currentPlayerIndex = 0
     private val playerHands = listOf(player1Hand, player2Hand, player3Hand, player4Hand)
@@ -120,22 +122,39 @@ class GameController : Initializable
      * Display all cards that are two of a kind on button press
      */
     @FXML
-    fun twoOfAKindButtonPress(event: ActionEvent)
-    {
+    fun twoOfAKindButtonPress(event: ActionEvent) {
+        selectedPairCards.clear() // Clear any previously selected cards
         currentScreen = 2
         setButtonPressedColour(twoOfAKindButton)
         cardTilePane.children.clear()
 
-        val pairs = player1Hand.groupBy { it.value }.filter { it.value.size >= 2 }
+        val currentHand = playerHands[currentPlayerIndex]
+        val pairs = currentHand.groupBy { it.value }.filter { it.value.size >= 2 }
 
         pairs.forEach { (value, cards) ->
-            if (cards.size >= 2)
-            {
-                for (i in 0 until 2)
-                {
-                    val imageView = ImageView(cards[i].image)
+            if (cards.size >= 2) {
+                for (i in 0 until 2) {
+                    val card = cards[i]
+                    val imageView = ImageView(card.image)
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
+
+                    // mouse click event for cards
+                    imageView.setOnMouseClicked { event ->
+                        // deselect
+                        if (selectedPairCards.contains(card))
+                        {
+                            deselectCard(card)
+                            selectedPairCards.remove(card)
+                        }
+                        // select card if 2 are not already selected
+                        else if (selectedPairCards.size < 2)
+                        {
+                            selectCard(card)
+                            selectedPairCards.add(card)
+                        }
+                    }
+
                     cardTilePane.children.add(imageView)
                 }
             }
@@ -251,21 +270,35 @@ class GameController : Initializable
     /**
      * Update what the player sees on the deck
      */
-    private fun updateViewDeck()
-    {
+    private fun updateViewDeck() {
         setButtonPressedColour(viewDeckButton)
         currentScreen = 0
         cardTilePane.children.clear()
         invalidPlayLabel.text = ""
-        val lastPlayedCard = playedCards.lastOrNull()
 
-        if (lastPlayedCard != null)
+        // singles round
+        if (moveType == 1) {  // Single card
+            val lastPlayedCard = playedCards.lastOrNull()
+            if (lastPlayedCard != null) {
+                val imageView = ImageView(lastPlayedCard.image)
+                imageView.fitHeight = 100.0
+                imageView.isPreserveRatio = true
+                cardTilePane.children.add(imageView)
+            }
+        }
+        // doubles round
+        else if (moveType == 2)
         {
-            val imageView = ImageView(lastPlayedCard.image)
-            imageView.fitHeight = 100.0
-            imageView.isPreserveRatio = true
-
-            cardTilePane.children.add(imageView)
+            if (playedCards.size >= 2)
+            {
+                val lastPlayedPair = playedCards.takeLast(2)
+                lastPlayedPair.forEach { card ->
+                    val imageView = ImageView(card.image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    cardTilePane.children.add(imageView)
+                }
+            }
         }
     }
 
@@ -346,6 +379,8 @@ class GameController : Initializable
                     }
                 }
 
+                // ALL CHECKS PASS //
+
                 moveType = 1
                 playedCards.add(card)
                 playerHands[currentPlayerIndex].remove(card)
@@ -368,6 +403,70 @@ class GameController : Initializable
                 invalidPlayLabel.text = "Error: You can't play two of a kind"
                 return
             }
+
+            if (selectedPairCards.size != 2)
+            {
+                invalidPlayLabel.text = "Error: Two cards must be selected."
+                return
+            }
+
+            val (card1, card2) = selectedPairCards
+
+            if (card1.value != card2.value)
+            {
+                invalidPlayLabel.text = "Error: Cards are not the same."
+                return
+            }
+
+            // check if pair is better than the last played pair
+            if (playedCards.size >= 2)
+            {
+                val lastPlayedCard1 = playedCards[playedCards.size - 2]
+                val lastPlayedCard2 = playedCards[playedCards.size - 1]
+
+                val selectedValueIndex = valueOrder.indexOf(card1.value)
+                val lastPlayedValueIndex = valueOrder.indexOf(lastPlayedCard1.value)
+
+                // check by value
+                if (selectedValueIndex < lastPlayedValueIndex)
+                {
+                    invalidPlayLabel.text = "Error: You must play a higher pair."
+                    return
+                }
+
+                // check suit
+                if (selectedValueIndex == lastPlayedValueIndex)
+                {
+                    val selectedHighestSuitIndex = maxOf(
+                        suitOrder.indexOf(card1.suit),
+                        suitOrder.indexOf(card2.suit)
+                    )
+                    val lastPlayedHighestSuitIndex = maxOf(
+                        suitOrder.indexOf(lastPlayedCard1.suit),
+                        suitOrder.indexOf(lastPlayedCard2.suit)
+                    )
+
+                    if (selectedHighestSuitIndex < lastPlayedHighestSuitIndex) {
+                        invalidPlayLabel.text = "Error: You must play a higher pair."
+                        return
+                    }
+                }
+            }
+
+            // ALL CHECKS PASS //
+
+            moveType = 2
+
+            playedCards.addAll(selectedPairCards)
+            playerHands[currentPlayerIndex].removeAll(selectedPairCards)
+            selectedPairCards.clear()
+
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+            } while (currentPlayerIndex in passedPlayers)
+
+            updateViewDeck()
+            updateTurnLabel()
         }
         // straight
         else if (currentScreen == 3)
@@ -408,15 +507,6 @@ class GameController : Initializable
             invalidPlayLabel.text = "Error: No cards selected."
         }
     }
-
-    /**
-     * Return true if selected card is of high value to the last card in deck
-     */
-    private fun canBeatCard(selectedCard: Card, lastPlayedCard: Card): Boolean
-    {
-        return selectedCard > lastPlayedCard
-    }
-
 
     /**
      * Runs on launch
