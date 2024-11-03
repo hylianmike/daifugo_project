@@ -104,12 +104,10 @@ class GameController : Initializable
 
             // mouse click event for cards
             imageView.setOnMouseClicked { event ->
-                // Deselect previously selected card
                 selectedCard?.let {
                     deselectCard(it)
                 }
 
-                // Select new card
                 selectedCard = card
                 selectCard(card)
             }
@@ -276,18 +274,17 @@ class GameController : Initializable
      */
     @FXML
     fun passButtonPress(event: ActionEvent?) {
-        // Add the current player to the passed players list
-        if (currentPlayerIndex !in passedPlayers) {
+        if (currentPlayerIndex !in passedPlayers)
+        {
             passedPlayers.add(currentPlayerIndex)
             passedPlayersCount++
 
-            // Check if the round should end (3 out of 4 players have passed)
-            if (passedPlayersCount >= (playerHands.size - 1)) {
+            if (passedPlayersCount >= (playerHands.size - 1))
+            {
                 endRound()
                 return
             }
 
-            // Increment currentPlayerIndex until a player who has not passed is found
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
             } while (currentPlayerIndex in passedPlayers)
@@ -297,16 +294,18 @@ class GameController : Initializable
         }
     }
 
+    /**
+     * Ends round once 3 players have passes
+     * Lets the last remaining player start the next round
+     */
     private fun endRound()
     {
         currentPlayerIndex = (0 until playerHands.size).first { it !in passedPlayers }
 
-        // Clear played cards for the new round
         playedCards.clear()
         passedPlayers.clear()
         passedPlayersCount = 0
 
-        // Update the turn label to reflect the new starting player
         updateTurnLabel()
         updateViewDeck()
         moveType = 0
@@ -318,8 +317,6 @@ class GameController : Initializable
      * Card values in order
      * 3,4,5,6,7,8,9,10,j,k,q,a,2
      * spades, clubs, diamonds, hearts
-     * TODO - only let player play card if it is of higher value
-     * TODO - only let player play card if it's the same type (e.x 4 straight, single, three of a kind, etc)
      */
     @FXML
     fun playButtonPress(event: ActionEvent?)
