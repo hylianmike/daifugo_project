@@ -27,6 +27,7 @@ class GameController : Initializable
 
     private var selectedCard: Card? = null
     private val selectedPairCards = mutableListOf<Card>()
+    private val selectedTripletCards = mutableListOf<Card>()
 
     private val playedCards = mutableListOf<Card>()
     private var currentPlayerIndex = 0
@@ -122,7 +123,8 @@ class GameController : Initializable
      * Display all cards that are two of a kind on button press
      */
     @FXML
-    fun twoOfAKindButtonPress(event: ActionEvent) {
+    fun twoOfAKindButtonPress(event: ActionEvent)
+    {
         selectedPairCards.clear() // Clear any previously selected cards
         currentScreen = 2
         setButtonPressedColour(twoOfAKindButton)
@@ -216,18 +218,35 @@ class GameController : Initializable
         setButtonPressedColour(threeOfAKindButton)
         cardTilePane.children.clear()
 
-        val triplets = player1Hand.groupBy { it.value }.filter { it.value.size >= 3 }
+        selectedTripletCards.clear()
 
-        triplets.forEach { (value, cards) ->
-            if (cards.size >= 3)
-            {
-                for (i in 0 until 3)
-                {
-                    val imageView = ImageView(cards[i].image)
-                    imageView.fitHeight = 100.0
-                    imageView.isPreserveRatio = true
-                    cardTilePane.children.add(imageView)
+        val currentHand = playerHands[currentPlayerIndex]
+        val triplets = currentHand.groupBy { it.value }.filter { it.value.size >= 3 }
+
+        triplets.forEach { (_, cards) ->
+            for (i in 0 until 3) {
+                val card = cards[i]
+                val imageView = ImageView(card.image)
+                imageView.fitHeight = 100.0
+                imageView.isPreserveRatio = true
+
+                // mouse click event for cards
+                imageView.setOnMouseClicked {
+                    // deselect
+                    if (selectedTripletCards.contains(card))
+                    {
+                        deselectCard(card)
+                        selectedTripletCards.remove(card)
+                    }
+                    // select
+                    else if (selectedTripletCards.size < 3)
+                    {
+                        selectedTripletCards.add(card)
+                        selectCard(card)
+                    }
                 }
+
+                cardTilePane.children.add(imageView)
             }
         }
     }
@@ -270,7 +289,8 @@ class GameController : Initializable
     /**
      * Update what the player sees on the deck
      */
-    private fun updateViewDeck() {
+    private fun updateViewDeck()
+    {
         setButtonPressedColour(viewDeckButton)
         currentScreen = 0
         cardTilePane.children.clear()
@@ -300,13 +320,34 @@ class GameController : Initializable
                 }
             }
         }
+        // straights move
+        else if (moveType == 3)
+        {
+
+        }
+        // triples move
+        else if (moveType == 4)
+        {
+            if (playedCards.size >= 3)
+            {
+                val lastPlayedTriplet = playedCards.takeLast(3)
+
+                lastPlayedTriplet.forEach { card ->
+                    val imageView = ImageView(card.image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    cardTilePane.children.add(imageView)
+                }
+            }
+        }
     }
 
     /**
      * Skip players turn on button press until next round
      */
     @FXML
-    fun passButtonPress(event: ActionEvent?) {
+    fun passButtonPress(event: ActionEvent?)
+    {
         if (currentPlayerIndex !in passedPlayers)
         {
             passedPlayers.add(currentPlayerIndex)
@@ -485,6 +526,54 @@ class GameController : Initializable
                 invalidPlayLabel.text = "Error: You can't play three of a kind."
                 return
             }
+
+            if (selectedTripletCards.size != 3)
+            {
+                invalidPlayLabel.text = "Error: Three cards must be selected."
+                return
+            }
+
+            val (card1, card2, card3) = selectedTripletCards
+
+            if (!(card1.value == card2.value && card2.value == card3.value))
+            {
+                invalidPlayLabel.text = "Error: All cards must have the same value."
+                return
+            }
+
+            if (playedCards.isNotEmpty()) {
+                val lastPlayedCard1 = playedCards[playedCards.size - 3]
+                val lastPlayedCard2 = playedCards[playedCards.size - 2]
+                val lastPlayedCard3 = playedCards.last()
+
+                // Compare values
+                val selectedValueIndex = valueOrder.indexOf(card1.value)
+                val lastPlayedValueIndex = valueOrder.indexOf(lastPlayedCard1.value)
+
+                // Check by value
+                if (selectedValueIndex < lastPlayedValueIndex) {
+                    invalidPlayLabel.text = "Error: You must play a higher triple."
+                    return
+                }
+
+                // If values are the same, no need to check suits as triples cannot have duplicate values
+            }
+
+            // ALL CHECKS PASS //
+
+            moveType = 4
+
+            playedCards.addAll(selectedTripletCards)
+            playerHands[currentPlayerIndex].removeAll(selectedTripletCards)
+            selectedTripletCards.clear()
+
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+            } while (currentPlayerIndex in passedPlayers)
+
+            updateViewDeck()
+            updateTurnLabel()
+
         }
         // quad
         else if (currentScreen == 5)
