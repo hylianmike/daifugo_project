@@ -772,6 +772,7 @@ class GameController : Initializable
     override fun initialize(url: URL?, resourceBundle: ResourceBundle?)
     {
         invalidPlayLabel.text = ""
+        setButtonPressedColour(viewDeckButton)
         updateTurnLabel()
         val resourcePath = javaClass.getResource("/com/example/daifugo/Cards")
 
