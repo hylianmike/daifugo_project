@@ -31,6 +31,9 @@ class GameController : Initializable
     private val playerHands = listOf(player1Hand, player2Hand, player3Hand, player4Hand)
     private var lastPressedButton: Button? = null
     private var currentScreen = 0
+    private var passedPlayersCount = 0
+    private val passedPlayers = mutableSetOf<Int>()
+    private var moveType = 0
 
     @FXML
     private lateinit var cardTilePane: TilePane
@@ -244,21 +247,77 @@ class GameController : Initializable
     @FXML
     fun viewDeckButtonPress(event: ActionEvent)
     {
-        setButtonPressedColour(viewDeckButton)
         updateViewDeck()
     }
 
     /**
-     * Skip players turn on button press
+     * Update what the player sees on the deck
      */
-    @FXML
-    fun passButtonPress(event: ActionEvent?)
+    private fun updateViewDeck()
     {
+        setButtonPressedColour(viewDeckButton)
+        currentScreen = 0
+        cardTilePane.children.clear()
+        invalidPlayLabel.text = ""
+        val lastPlayedCard = playedCards.lastOrNull()
 
+        if (lastPlayedCard != null)
+        {
+            val imageView = ImageView(lastPlayedCard.image)
+            imageView.fitHeight = 100.0
+            imageView.isPreserveRatio = true
+
+            cardTilePane.children.add(imageView)
+        }
     }
 
     /**
+     * Skip players turn on button press until next round
+     */
+    @FXML
+    fun passButtonPress(event: ActionEvent?) {
+        // Add the current player to the passed players list
+        if (currentPlayerIndex !in passedPlayers) {
+            passedPlayers.add(currentPlayerIndex)
+            passedPlayersCount++
+
+            // Check if the round should end (3 out of 4 players have passed)
+            if (passedPlayersCount >= (playerHands.size - 1)) {
+                endRound()
+                return
+            }
+
+            // Increment currentPlayerIndex until a player who has not passed is found
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+            } while (currentPlayerIndex in passedPlayers)
+
+            updateTurnLabel()
+            updateViewDeck()
+        }
+    }
+
+    private fun endRound()
+    {
+        currentPlayerIndex = (0 until playerHands.size).first { it !in passedPlayers }
+
+        // Clear played cards for the new round
+        playedCards.clear()
+        passedPlayers.clear()
+        passedPlayersCount = 0
+
+        // Update the turn label to reflect the new starting player
+        updateTurnLabel()
+        updateViewDeck()
+        moveType = 0
+    }
+
+
+    /**
      * Play a card and go to next turn on button press
+     * Card values in order
+     * 3,4,5,6,7,8,9,10,j,k,q,a,2
+     * spades, clubs, diamonds, hearts
      * TODO - only let player play card if it is of higher value
      * TODO - only let player play card if it's the same type (e.x 4 straight, single, three of a kind, etc)
      */
@@ -268,6 +327,12 @@ class GameController : Initializable
         // singles
         if (currentScreen == 1)
         {
+            if (moveType == 2 || moveType == 3 || moveType == 4 || moveType == 5)
+            {
+                invalidPlayLabel.text = "Error: You can't play a single."
+                return
+            }
+
             if (selectedCard == null)
             {
                 invalidPlayLabel.text = "Error: No cards selected."
@@ -275,11 +340,24 @@ class GameController : Initializable
             }
 
             selectedCard?.let { card ->
+                // check if the card played is valid against the played cards
+                if (playedCards.isNotEmpty()) {
+                    val lastPlayedCard = playedCards.last()
+                    if (card <= lastPlayedCard) {
+                        invalidPlayLabel.text = "Error: You must play a higher card."
+                        return
+                    }
+                }
+
+                moveType = 1
                 playedCards.add(card)
                 playerHands[currentPlayerIndex].remove(card)
                 selectedCard = null
 
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+                do {
+                    currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+                } while (currentPlayerIndex in passedPlayers)
+
                 updateTurnLabel()
                 setButtonPressedColour(viewDeckButton)
                 updateViewDeck()
@@ -288,22 +366,38 @@ class GameController : Initializable
         // doubles
         else if (currentScreen == 2)
         {
-
+            if (moveType == 1 || moveType == 3 || moveType == 4 || moveType == 5)
+            {
+                invalidPlayLabel.text = "Error: You can't play two of a kind"
+                return
+            }
         }
         // straight
         else if (currentScreen == 3)
         {
-
+            if (moveType == 2 || moveType == 1 || moveType == 4 || moveType == 5)
+            {
+                invalidPlayLabel.text = "Error: You can't play a straight."
+                return
+            }
         }
         // triples
         else if (currentScreen == 4)
         {
-
+            if (moveType == 2 || moveType == 3 || moveType == 1 || moveType == 5)
+            {
+                invalidPlayLabel.text = "Error: You can't play three of a kind."
+                return
+            }
         }
         // quad
         else if (currentScreen == 5)
         {
-
+            if (moveType == 2 || moveType == 3 || moveType == 4 || moveType == 1)
+            {
+                invalidPlayLabel.text = "Error: You can't play four of a kind."
+                return
+            }
         }
         // IF TIME PERMITS
         // kill piggy
@@ -319,24 +413,13 @@ class GameController : Initializable
     }
 
     /**
-     * Update what the player sees on the deck
+     * Return true if selected card is of high value to the last card in deck
      */
-    private fun updateViewDeck()
+    private fun canBeatCard(selectedCard: Card, lastPlayedCard: Card): Boolean
     {
-        currentScreen = 0
-        cardTilePane.children.clear()
-        invalidPlayLabel.text = ""
-        val lastPlayedCard = playedCards.lastOrNull()
-
-        if (lastPlayedCard != null)
-        {
-            val imageView = ImageView(lastPlayedCard.image)
-            imageView.fitHeight = 100.0
-            imageView.isPreserveRatio = true
-
-            cardTilePane.children.add(imageView)
-        }
+        return selectedCard > lastPlayedCard
     }
+
 
     /**
      * Runs on launch
