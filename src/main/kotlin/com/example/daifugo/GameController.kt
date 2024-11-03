@@ -30,12 +30,13 @@ class GameController : Initializable
     private var currentPlayerIndex = 0
     private val playerHands = listOf(player1Hand, player2Hand, player3Hand, player4Hand)
     private var lastPressedButton: Button? = null
+    private var currentScreen = 0
 
     @FXML
     private lateinit var cardTilePane: TilePane
 
     @FXML
-    private val invalidPlayLabel: Label? = null
+    private lateinit var invalidPlayLabel: Label
 
     @FXML
     private lateinit var fourOfAKindButton: Button
@@ -57,6 +58,13 @@ class GameController : Initializable
 
     @FXML
     private lateinit var turnLabel: Label
+
+    /**
+     * Update text for who's turn it is
+     */
+    private fun updateTurnLabel() {
+        turnLabel.text = "Player ${currentPlayerIndex + 1}'s Turn"
+    }
 
     @FXML
     private lateinit var twoOfAKindButton: Button
@@ -80,6 +88,8 @@ class GameController : Initializable
     @FXML
     fun singlesButtonPress(event: ActionEvent)
     {
+        selectedCard = null
+        currentScreen = 1
         setButtonPressedColour(singlesButton)
         cardTilePane.children.clear()
         val currentHand = playerHands[currentPlayerIndex]
@@ -89,7 +99,7 @@ class GameController : Initializable
             imageView.fitHeight = 100.0
             imageView.isPreserveRatio = true
 
-            // Add mouse click event to the image view
+            // mouse click event for cards
             imageView.setOnMouseClicked { event ->
                 // Deselect previously selected card
                 selectedCard?.let {
@@ -111,6 +121,7 @@ class GameController : Initializable
     @FXML
     fun twoOfAKindButtonPress(event: ActionEvent)
     {
+        currentScreen = 2
         setButtonPressedColour(twoOfAKindButton)
         cardTilePane.children.clear()
 
@@ -131,61 +142,12 @@ class GameController : Initializable
     }
 
     /**
-     * Display all cards that are three of a kind on button press
-     */
-    @FXML
-    fun threeOfAKindButtonPress(event: ActionEvent)
-    {
-        setButtonPressedColour(threeOfAKindButton)
-        cardTilePane.children.clear()
-
-        val triplets = player1Hand.groupBy { it.value }.filter { it.value.size >= 3 }
-
-        triplets.forEach { (value, cards) ->
-            if (cards.size >= 3)
-            {
-                for (i in 0 until 3)
-                {
-                    val imageView = ImageView(cards[i].image)
-                    imageView.fitHeight = 100.0
-                    imageView.isPreserveRatio = true
-                    cardTilePane.children.add(imageView)
-                }
-            }
-        }
-    }
-
-    /**
-     * Display all cards that are four of a kind on button press
-     */
-    @FXML
-    fun fourOfAKindButtonPress(event: ActionEvent)
-    {
-        setButtonPressedColour(fourOfAKindButton)
-        cardTilePane.children.clear()
-
-        val quads = player1Hand.groupBy { it.value }.filter { it.value.size >= 4 }
-
-        quads.forEach { (value, cards) ->
-            if (cards.size >= 4)
-            {
-                for (i in 0 until 4)
-                {
-                    val imageView = ImageView(cards[i].image)
-                    imageView.fitHeight = 100.0
-                    imageView.isPreserveRatio = true
-                    cardTilePane.children.add(imageView)
-                }
-            }
-        }
-    }
-
-    /**
      * Display all straights on button press that are at least 3 in length
      */
     @FXML
     fun straightsButtonPress(event: ActionEvent)
     {
+        currentScreen = 3
         setButtonPressedColour(straightsButton)
         cardTilePane.children.clear()
 
@@ -225,6 +187,58 @@ class GameController : Initializable
     }
 
     /**
+     * Display all cards that are three of a kind on button press
+     */
+    @FXML
+    fun threeOfAKindButtonPress(event: ActionEvent)
+    {
+        currentScreen = 4
+        setButtonPressedColour(threeOfAKindButton)
+        cardTilePane.children.clear()
+
+        val triplets = player1Hand.groupBy { it.value }.filter { it.value.size >= 3 }
+
+        triplets.forEach { (value, cards) ->
+            if (cards.size >= 3)
+            {
+                for (i in 0 until 3)
+                {
+                    val imageView = ImageView(cards[i].image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    cardTilePane.children.add(imageView)
+                }
+            }
+        }
+    }
+
+    /**
+     * Display all cards that are four of a kind on button press
+     */
+    @FXML
+    fun fourOfAKindButtonPress(event: ActionEvent)
+    {
+        currentScreen = 5
+        setButtonPressedColour(fourOfAKindButton)
+        cardTilePane.children.clear()
+
+        val quads = player1Hand.groupBy { it.value }.filter { it.value.size >= 4 }
+
+        quads.forEach { (value, cards) ->
+            if (cards.size >= 4)
+            {
+                for (i in 0 until 4)
+                {
+                    val imageView = ImageView(cards[i].image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    cardTilePane.children.add(imageView)
+                }
+            }
+        }
+    }
+
+    /**
      * Display cards that have been played on button press
      */
     @FXML
@@ -251,14 +265,56 @@ class GameController : Initializable
     @FXML
     fun playButtonPress(event: ActionEvent?)
     {
-        selectedCard?.let { card ->
-            playedCards.add(card)
-            playerHands[currentPlayerIndex].remove(card)
-            selectedCard = null
+        // singles
+        if (currentScreen == 1)
+        {
+            if (selectedCard == null)
+            {
+                invalidPlayLabel.text = "Error: No cards selected."
+                return
+            }
 
-            currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-            setButtonPressedColour(viewDeckButton)
-            updateViewDeck()
+            selectedCard?.let { card ->
+                playedCards.add(card)
+                playerHands[currentPlayerIndex].remove(card)
+                selectedCard = null
+
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+                updateTurnLabel()
+                setButtonPressedColour(viewDeckButton)
+                updateViewDeck()
+            }
+        }
+        // doubles
+        else if (currentScreen == 2)
+        {
+
+        }
+        // straight
+        else if (currentScreen == 3)
+        {
+
+        }
+        // triples
+        else if (currentScreen == 4)
+        {
+
+        }
+        // quad
+        else if (currentScreen == 5)
+        {
+
+        }
+        // IF TIME PERMITS
+        // kill piggy
+        else if (currentScreen == 6)
+        {
+
+        }
+        // on deck screen
+        else
+        {
+            invalidPlayLabel.text = "Error: No cards selected."
         }
     }
 
@@ -267,7 +323,9 @@ class GameController : Initializable
      */
     private fun updateViewDeck()
     {
+        currentScreen = 0
         cardTilePane.children.clear()
+        invalidPlayLabel.text = ""
         val lastPlayedCard = playedCards.lastOrNull()
 
         if (lastPlayedCard != null)
@@ -286,6 +344,8 @@ class GameController : Initializable
      */
     override fun initialize(url: URL?, resourceBundle: ResourceBundle?)
     {
+        invalidPlayLabel.text = ""
+        updateTurnLabel()
         val resourcePath = javaClass.getResource("/com/example/daifugo/Cards")
 
         resourcePath?.let { path ->

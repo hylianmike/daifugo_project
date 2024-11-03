@@ -30,3 +30,13 @@
 .button-pressed {
     -fx-background-color: #cc0000;
 }
+
+#invalidPlayLabel
+{
+    -fx-text-fill: red;
+}
+
+#turnLabel
+{
+    -fx-text-fill: red;
+}

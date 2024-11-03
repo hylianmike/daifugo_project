@@ -34,25 +34,6 @@
                </padding>
             </VBox>
          </left>
-         <top>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Label fx:id="turnLabel" stylesheets="@styles.css" text="Blank's Turn" translateX="-200.0">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                     <font>
-                        <Font size="32.0" />
-                     </font>
-                  </Label>
-                  <Label text="Deck:">
-                     <font>
-                        <Font size="32.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
-         </top>
          <center>
             <TilePane fx:id="cardTilePane" alignment="CENTER" hgap="10.0" vgap="10.0">
                <BorderPane.margin>
@@ -63,7 +44,10 @@
          <bottom>
             <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                <children>
-                  <Label fx:id="invalidPlayLabel" />
+                  <Label fx:id="invalidPlayLabel" text="Error Message">
+                     <font>
+                        <Font name="System Italic" size="20.0" />
+                     </font></Label>
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
                      <children>
                         <Button id="playButton" fx:id="playButton" mnemonicParsing="false" onAction="#playButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Play" />
@@ -73,6 +57,16 @@
                </children>
             </VBox>
          </bottom>
+         <top>
+            <Label fx:id="turnLabel" stylesheets="@styles.css" text="Turn" BorderPane.alignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="32.0" />
+               </font>
+               <BorderPane.margin>
+                  <Insets top="20.0" />
+               </BorderPane.margin>
+            </Label>
+         </top>
       </BorderPane>
    </children>
 </AnchorPane>
