@@ -28,6 +28,7 @@ class GameController : Initializable
     private var selectedCard: Card? = null
     private val selectedPairCards = mutableListOf<Card>()
     private val selectedTripletCards = mutableListOf<Card>()
+    private val selectedQuadCards = mutableListOf<Card>()
 
     private val playedCards = mutableListOf<Card>()
     private var currentPlayerIndex = 0
@@ -260,19 +261,35 @@ class GameController : Initializable
         currentScreen = 5
         setButtonPressedColour(fourOfAKindButton)
         cardTilePane.children.clear()
+        selectedQuadCards.clear()
 
-        val quads = player1Hand.groupBy { it.value }.filter { it.value.size >= 4 }
+        val currentHand = playerHands[currentPlayerIndex]
+        val quads = currentHand.groupBy { it.value }.filter { it.value.size >= 4 }
 
-        quads.forEach { (value, cards) ->
-            if (cards.size >= 4)
-            {
-                for (i in 0 until 4)
-                {
-                    val imageView = ImageView(cards[i].image)
-                    imageView.fitHeight = 100.0
-                    imageView.isPreserveRatio = true
-                    cardTilePane.children.add(imageView)
+        quads.forEach { (_, cards) ->
+            for (i in 0 until 4) {
+                val card = cards[i]
+                val imageView = ImageView(card.image)
+                imageView.fitHeight = 100.0
+                imageView.isPreserveRatio = true
+
+                // mouse click event for cards
+                imageView.setOnMouseClicked {
+                    // deselect
+                    if (selectedQuadCards.contains(card))
+                    {
+                        deselectCard(card)
+                        selectedQuadCards.remove(card)
+                    }
+                    // select
+                    else if (selectedQuadCards.size < 4)
+                    {
+                        selectedQuadCards.add(card)
+                        selectCard(card)
+                    }
                 }
+
+                cardTilePane.children.add(imageView)
             }
         }
     }
@@ -333,6 +350,21 @@ class GameController : Initializable
                 val lastPlayedTriplet = playedCards.takeLast(3)
 
                 lastPlayedTriplet.forEach { card ->
+                    val imageView = ImageView(card.image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    cardTilePane.children.add(imageView)
+                }
+            }
+        }
+        // quads move
+        else if (moveType == 5)
+        {
+            if (playedCards.size >= 4)
+            {
+                val lastPlayedQuad = playedCards.takeLast(4)
+
+                lastPlayedQuad.forEach { card ->
                     val imageView = ImageView(card.image)
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
@@ -541,22 +573,20 @@ class GameController : Initializable
                 return
             }
 
-            if (playedCards.isNotEmpty()) {
+            if (playedCards.size >= 3)
+            {
                 val lastPlayedCard1 = playedCards[playedCards.size - 3]
                 val lastPlayedCard2 = playedCards[playedCards.size - 2]
-                val lastPlayedCard3 = playedCards.last()
+                val lastPlayedCard3 = playedCards[playedCards.size - 1]
 
-                // Compare values
                 val selectedValueIndex = valueOrder.indexOf(card1.value)
                 val lastPlayedValueIndex = valueOrder.indexOf(lastPlayedCard1.value)
 
-                // Check by value
-                if (selectedValueIndex < lastPlayedValueIndex) {
-                    invalidPlayLabel.text = "Error: You must play a higher triple."
+                if (selectedValueIndex < lastPlayedValueIndex)
+                {
+                    invalidPlayLabel.text = "Error: You must play a higher three of a kind."
                     return
                 }
-
-                // If values are the same, no need to check suits as triples cannot have duplicate values
             }
 
             // ALL CHECKS PASS //
@@ -583,6 +613,52 @@ class GameController : Initializable
                 invalidPlayLabel.text = "Error: You can't play four of a kind."
                 return
             }
+
+            if (selectedQuadCards.size != 4)
+            {
+                invalidPlayLabel.text = "Error: Four cards must be selected."
+                return
+            }
+
+            val (card1, card2, card3, card4) = selectedQuadCards
+
+            if (!(card1.value == card2.value && card2.value == card3.value && card3.value == card4.value))
+            {
+                invalidPlayLabel.text = "Error: All cards must have the same value."
+                return
+            }
+
+            if (playedCards.size >= 4)
+            {
+                val lastPlayedCard1 = playedCards[playedCards.size - 4]
+                val lastPlayedCard2 = playedCards[playedCards.size - 3]
+                val lastPlayedCard3 = playedCards[playedCards.size - 2]
+                val lastPlayedCard4 = playedCards[playedCards.size - 1]
+
+                val selectedValueIndex = valueOrder.indexOf(card1.value)
+                val lastPlayedValueIndex = valueOrder.indexOf(lastPlayedCard1.value)
+
+                if (selectedValueIndex < lastPlayedValueIndex)
+                {
+                    invalidPlayLabel.text = "Error: You must play a higher four of a kind."
+                    return
+                }
+            }
+
+            // ALL CHECKS PASS //
+
+            moveType = 5
+
+            playedCards.addAll(selectedQuadCards)
+            playerHands[currentPlayerIndex].removeAll(selectedQuadCards)
+            selectedQuadCards.clear()
+
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+            } while (currentPlayerIndex in passedPlayers)
+
+            updateViewDeck()
+            updateTurnLabel()
         }
         // IF TIME PERMITS
         // kill piggy
