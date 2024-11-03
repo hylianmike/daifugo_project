@@ -29,6 +29,7 @@ class GameController : Initializable
     private val selectedPairCards = mutableListOf<Card>()
     private val selectedTripletCards = mutableListOf<Card>()
     private val selectedQuadCards = mutableListOf<Card>()
+    private val selectedStraightCards = mutableListOf<Card>()
 
     private val playedCards = mutableListOf<Card>()
     private var currentPlayerIndex = 0
@@ -38,6 +39,7 @@ class GameController : Initializable
     private var passedPlayersCount = 0
     private val passedPlayers = mutableSetOf<Int>()
     private var moveType = 0
+    private var straightSize = 0
 
     @FXML
     private lateinit var cardTilePane: TilePane
@@ -173,15 +175,17 @@ class GameController : Initializable
         currentScreen = 3
         setButtonPressedColour(straightsButton)
         cardTilePane.children.clear()
+        selectedStraightCards.clear()
 
-        val uniqueValues = player1Hand.map { it.value }.distinct()
+        val currentHand = playerHands[currentPlayerIndex]
+        val uniqueValues = currentHand.map { it.value }.distinct()
         val straights = mutableListOf<List<Card>>()
         var currentStraight = mutableListOf<Card>()
 
         for (i in uniqueValues.indices)
         {
             val currentValue = uniqueValues[i]
-            val card = player1Hand.find { it.value == currentValue }
+            val card = currentHand.find { it.value == currentValue }
 
             if (card != null)
             {
@@ -204,6 +208,23 @@ class GameController : Initializable
                 val imageView = ImageView(card.image)
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
+
+                // mouse click event for cards
+                imageView.setOnMouseClicked {
+                    // deselect
+                    if (selectedStraightCards.contains(card))
+                    {
+                        deselectCard(card)
+                        selectedStraightCards.remove(card)
+                    }
+                    // select
+                    else
+                    {
+                        selectedStraightCards.add(card)
+                        selectCard(card)
+                    }
+                }
+
                 cardTilePane.children.add(imageView)
             }
         }
@@ -337,10 +358,20 @@ class GameController : Initializable
                 }
             }
         }
-        // straights move
+        // straights round
         else if (moveType == 3)
         {
+            if (playedCards.size >= straightSize)
+            {
+                val lastPlayedStraight = playedCards.takeLast(straightSize)
 
+                lastPlayedStraight.forEach { card ->
+                    val imageView = ImageView(card.image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    cardTilePane.children.add(imageView)
+                }
+            }
         }
         // triples move
         else if (moveType == 4)
@@ -411,10 +442,11 @@ class GameController : Initializable
         playedCards.clear()
         passedPlayers.clear()
         passedPlayersCount = 0
+        moveType = 0
+        straightSize = 0
 
         updateTurnLabel()
         updateViewDeck()
-        moveType = 0
     }
 
 
@@ -549,6 +581,66 @@ class GameController : Initializable
                 invalidPlayLabel.text = "Error: You can't play a straight."
                 return
             }
+
+            if (selectedStraightCards.size < 3)
+            {
+                invalidPlayLabel.text = "Error: At least three cards must be selected."
+                return
+            }
+
+            val sortedSelectedCards = selectedStraightCards.sortedBy { valueOrder.indexOf(it.value) }
+
+            for (i in 0 until sortedSelectedCards.size - 1)
+            {
+                val currentIndex = valueOrder.indexOf(sortedSelectedCards[i].value)
+                val nextIndex = valueOrder.indexOf(sortedSelectedCards[i + 1].value)
+
+                if (nextIndex != currentIndex + 1)
+                {
+                    invalidPlayLabel.text = "Error: Selected cards do not form a valid straight."
+                    return
+                }
+            }
+
+            if (straightSize >= 3)
+            {
+                if (selectedStraightCards.size != straightSize)
+                {
+                    invalidPlayLabel.text = "Error: Straight must be the same size as the deck."
+                    return
+                }
+
+                val lastPlayedStraight = playedCards.takeLastWhile { valueOrder.contains(it.value) }
+                val lastHighestCard = lastPlayedStraight.maxWithOrNull(compareBy({ valueOrder.indexOf(it.value) }, { suitOrder.indexOf(it.suit) }))
+                val selectedHighestCard = selectedStraightCards.maxWithOrNull(compareBy({ valueOrder.indexOf(it.value) }, { suitOrder.indexOf(it.suit) }))
+
+                if (selectedHighestCard != null && lastHighestCard != null)
+                {
+                    val selectedValueIndex = valueOrder.indexOf(selectedHighestCard.value)
+                    val lastValueIndex = valueOrder.indexOf(lastHighestCard.value)
+
+                    if (selectedValueIndex < lastValueIndex || (selectedValueIndex == lastValueIndex && suitOrder.indexOf(selectedHighestCard.suit) <= suitOrder.indexOf(lastHighestCard.suit)))
+                    {
+                        invalidPlayLabel.text = "Error: You must play a higher value straight."
+                        return
+                    }
+                }
+            }
+
+            // ALL CHECKS PASS //
+
+            moveType = 3
+            straightSize = selectedStraightCards.size
+            playedCards.addAll(selectedStraightCards)
+            playerHands[currentPlayerIndex].removeAll(selectedStraightCards)
+            selectedStraightCards.clear()
+
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+            } while (currentPlayerIndex in passedPlayers)
+
+            updateViewDeck()
+            updateTurnLabel()
         }
         // triples
         else if (currentScreen == 4)
