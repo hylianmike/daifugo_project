@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.daifugo.HomeController"
-            prefHeight="800.0" prefWidth="1000.0">
+<AnchorPane prefHeight="800.0" prefWidth="1000.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.HomeController">
+   <children>
+      <BorderPane layoutX="242.0" layoutY="208.0" prefHeight="800.0" prefWidth="1000.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <center>
+            <ImageView fitHeight="510.0" fitWidth="431.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+               <image>
+                  <Image url="@temp-logo.png" />
+               </image>
+            </ImageView>
+         </center>
 
+          <bottom>
+              <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                  <children>
+                      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
+                          <children>
+                              <TextField id="playButton" fx:id="nameField" alignment="CENTER" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Enter Name" />
+                              <Button fx:id="playGameButton" mnemonicParsing="false" onAction="#playGame" style="-fx-padding: 10 20; -fx-font-size: 16;" stylesheets="@styles.css" text="Play Game" />
+                          </children>
+                      </HBox>
+                  </children>
+              </VBox>
+          </bottom>
+      </BorderPane>
+   </children>
 </AnchorPane>
