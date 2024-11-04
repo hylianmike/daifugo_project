@@ -418,14 +418,12 @@ class GameController : Initializable
         }
 
         for (card in playedCards){
-            if (card.suit == "spades")
-                spadeCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
-            else if (card.suit == "clubs")
-                clubCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
-            else if (card.suit == "hearts")
-                heartCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
-            else if (card.suit == "diamonds")
-                diamondCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+            when(card.suit){
+                "spades" -> spadeCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+                "clubs" -> clubCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+                "hearts" -> heartCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+                "diamonds" -> diamondCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+            }
         }
     }
 

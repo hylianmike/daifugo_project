@@ -87,7 +87,7 @@
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="HEARTS">
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="DIAMONDS">
                                  <styleClass>
                                     <String fx:value="red-card" />
                                     <String fx:value="card-icon" />
@@ -97,7 +97,7 @@
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="DIAMONDS">
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="HEARTS">
                                  <styleClass>
                                     <String fx:value="red-card" />
                                     <String fx:value="card-icon" />
@@ -146,7 +146,7 @@
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="card-icon" text="2" />
                            </children>
                         </HBox>
-                        <HBox fx:id="heartCards" prefHeight="100.0" prefWidth="200.0">
+                        <HBox fx:id="diamondCards" prefHeight="100.0" prefWidth="200.0">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="3">
                                  <styleClass>
@@ -228,7 +228,7 @@
                               </Text>
                            </children>
                         </HBox>
-                        <HBox fx:id="diamondCards" prefHeight="100.0" prefWidth="200.0">
+                        <HBox fx:id="heartCards" prefHeight="100.0" prefWidth="200.0">
                            <children>
                               <Text strokeType="OUTSIDE" strokeWidth="0.0" text="3">
                                  <styleClass>
