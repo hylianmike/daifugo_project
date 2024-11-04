@@ -40,3 +40,11 @@
 {
     -fx-text-fill: red;
 }
+
+.card-icon{
+    -fx-font-size: 16px;
+}
+
+.red-card{
+    -fx-fill: red;
+}

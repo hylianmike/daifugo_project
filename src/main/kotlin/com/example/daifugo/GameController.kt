@@ -8,6 +8,7 @@ import javafx.scene.control.Label
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.TilePane
+import javafx.scene.layout.HBox
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -67,6 +68,18 @@ class GameController : Initializable
 
     @FXML
     private lateinit var turnLabel: Label
+
+    @FXML
+    private lateinit var spadeCards: HBox
+
+    @FXML
+    private lateinit var clubCards: HBox
+
+    @FXML
+    private lateinit var heartCards: HBox
+
+    @FXML
+    private lateinit var diamondCards: HBox
 
     /**
      * Update text for who's turn it is
@@ -402,6 +415,17 @@ class GameController : Initializable
                     cardTilePane.children.add(imageView)
                 }
             }
+        }
+
+        for (card in playedCards){
+            if (card.suit == "spades")
+                spadeCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+            else if (card.suit == "clubs")
+                clubCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+            else if (card.suit == "hearts")
+                heartCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
+            else if (card.suit == "diamonds")
+                diamondCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
         }
     }
 
