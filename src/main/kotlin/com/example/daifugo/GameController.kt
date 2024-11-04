@@ -376,7 +376,7 @@ class GameController : Initializable
         {
             if (playedCards.size >= straightSize)
             {
-                val lastPlayedStraight = playedCards.takeLast(straightSize)
+                val lastPlayedStraight = playedCards.takeLast(straightSize).sortedBy { valueOrder.indexOf(it.value) }
 
                 lastPlayedStraight.forEach { card ->
                     val imageView = ImageView(card.image)
