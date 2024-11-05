@@ -5,6 +5,7 @@ import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.TilePane
@@ -857,6 +858,12 @@ class GameController : Initializable
     {
         cardTilePane.children.filterIsInstance<ImageView>().find { it.image == card.image }?.apply {
             style = "-fx-effect: innershadow(gaussian, rgba(255, 215, 0, 0.8), 10, 0.0, 0, 0);"
+            ColorAdjust().apply{brightness=0.0}
+        }
+
+        // any non-selected cards become greyed out
+        cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
+            it.effect = ColorAdjust().apply { brightness = -0.2 }
         }
     }
 
@@ -867,6 +874,14 @@ class GameController : Initializable
     {
         cardTilePane.children.filterIsInstance<ImageView>().find { it.image == card.image }?.apply {
             style = ""
+            effect = ColorAdjust().apply { brightness = -0.2 }
+        }
+
+        // if there are no more selected cards, the greyed out effect is removed from all the cards
+        if (cardTilePane.children.filterIsInstance<ImageView>().none { it.style.contains("innershadow") }) {
+            cardTilePane.children.filterIsInstance<ImageView>().forEach {
+                it.effect = ColorAdjust().apply { brightness = 0.0 }
+            }
         }
     }
 }
