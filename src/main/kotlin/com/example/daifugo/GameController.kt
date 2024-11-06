@@ -125,11 +125,11 @@ class GameController : Initializable
             // mouse click event for cards
             imageView.setOnMouseClicked { event ->
                 selectedCard?.let {
-                    deselectCard(it)
+                    deselectCard(it, 1)
                 }
 
                 selectedCard = card
-                selectCard(card)
+                selectCard(card, 1)
             }
 
             cardTilePane.children.add(imageView)
@@ -163,13 +163,13 @@ class GameController : Initializable
                         // deselect
                         if (selectedPairCards.contains(card))
                         {
-                            deselectCard(card)
+                            deselectCard(card, 2)
                             selectedPairCards.remove(card)
                         }
                         // select card if 2 are not already selected
                         else if (selectedPairCards.size < 2)
                         {
-                            selectCard(card)
+                            selectCard(card, 2)
                             selectedPairCards.add(card)
                         }
                     }
@@ -228,14 +228,14 @@ class GameController : Initializable
                     // deselect
                     if (selectedStraightCards.contains(card))
                     {
-                        deselectCard(card)
+                        deselectCard(card, 1)
                         selectedStraightCards.remove(card)
                     }
                     // select
                     else
                     {
                         selectedStraightCards.add(card)
-                        selectCard(card)
+                        selectCard(card, 1)
                     }
                 }
 
@@ -271,14 +271,14 @@ class GameController : Initializable
                     // deselect
                     if (selectedTripletCards.contains(card))
                     {
-                        deselectCard(card)
+                        deselectCard(card, 3)
                         selectedTripletCards.remove(card)
                     }
                     // select
                     else if (selectedTripletCards.size < 3)
                     {
                         selectedTripletCards.add(card)
-                        selectCard(card)
+                        selectCard(card, 3)
                     }
                 }
 
@@ -313,14 +313,14 @@ class GameController : Initializable
                     // deselect
                     if (selectedQuadCards.contains(card))
                     {
-                        deselectCard(card)
+                        deselectCard(card, 4)
                         selectedQuadCards.remove(card)
                     }
                     // select
                     else if (selectedQuadCards.size < 4)
                     {
                         selectedQuadCards.add(card)
-                        selectCard(card)
+                        selectCard(card, 4)
                     }
                 }
 
@@ -852,35 +852,42 @@ class GameController : Initializable
     }
 
     /**
-     * Highlight the selected card
+     * Highlight the selected card, grey out the others
      */
-    private fun selectCard(card: Card)
+    private fun selectCard(card: Card, cardsToPlayCount: Int)
     {
         cardTilePane.children.filterIsInstance<ImageView>().find { it.image == card.image }?.apply {
             style = "-fx-effect: innershadow(gaussian, rgba(255, 215, 0, 0.8), 10, 0.0, 0, 0);"
-            ColorAdjust().apply{brightness=0.0}
+            opacity = 1.0
         }
 
-        // any non-selected cards become greyed out
-        cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
-            it.effect = ColorAdjust().apply { brightness = -0.2 }
+        // return count of how many cards have been selected
+        val innershadowCount = cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") }
+        // if user has selected the number of cards for their play type (ex. they have selected 3 cards and are playing 3 of a kind),
+        //  the non-selected cards become greyed out
+        if (innershadowCount >= cardsToPlayCount) {
+            cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
+                it.opacity = 0.8
+            }
         }
     }
 
     /**
-     * Unhighlight selected card
+     * Unhighlight selected card, un-grey out the non-selected cards
      */
-    private fun deselectCard(card: Card)
+    private fun deselectCard(card: Card, cardsToPlayCount: Int)
     {
         cardTilePane.children.filterIsInstance<ImageView>().find { it.image == card.image }?.apply {
             style = ""
-            effect = ColorAdjust().apply { brightness = -0.2 }
+            opacity = 0.8
         }
 
-        // if there are no more selected cards, the greyed out effect is removed from all the cards
-        if (cardTilePane.children.filterIsInstance<ImageView>().none { it.style.contains("innershadow") }) {
-            cardTilePane.children.filterIsInstance<ImageView>().forEach {
-                it.effect = ColorAdjust().apply { brightness = 0.0 }
+        // return count of how many cards have been selected
+        val innershadowCount = cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") }
+        // If the number of cards with the inner shadow effect is less than the total cards to be played, remove the greyed-out effect
+        if (cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") } < cardsToPlayCount) {
+            cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
+                    it.opacity = 1.0
             }
         }
     }
