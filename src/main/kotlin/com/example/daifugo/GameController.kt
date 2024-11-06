@@ -125,8 +125,8 @@ class GameController : Initializable
             val imageView = ImageView(card.image)
             imageView.fitHeight = 100.0
             imageView.isPreserveRatio = true
-
             imageView.translateX = 800.0
+            imageView.styleClass.add("card-image")
 
             // animation
             val transition = TranslateTransition(Duration.millis(400.0), imageView)
@@ -177,6 +177,7 @@ class GameController : Initializable
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
                     imageView.translateX = 800.0
+                    imageView.styleClass.add("card-image")
 
                     // animation
                     val transition = TranslateTransition(Duration.millis(400.0), imageView)
@@ -254,6 +255,7 @@ class GameController : Initializable
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
                 imageView.translateX = 800.0
+                imageView.styleClass.add("card-image")
 
                 // animation
                 val transition = TranslateTransition(Duration.millis(400.0), imageView)
@@ -307,6 +309,7 @@ class GameController : Initializable
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
                 imageView.translateX = 800.0
+                imageView.styleClass.add("card-image")
 
                 // animation
                 val transition = TranslateTransition(Duration.millis(400.0), imageView)
@@ -360,6 +363,7 @@ class GameController : Initializable
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
                 imageView.translateX = 800.0
+                imageView.styleClass.add("card-image")
 
                 // animation
                 val transition = TranslateTransition(Duration.millis(400.0), imageView)

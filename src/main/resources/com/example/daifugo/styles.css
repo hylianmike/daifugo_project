@@ -48,3 +48,15 @@
 .red-card{
     -fx-fill: red;
 }
+
+.card-image
+{
+    -fx-cursor: hand;
+    -fx-transition: transform 0.2s ease-in-out;
+}
+
+.card-image:hover
+{
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
