@@ -5,7 +5,6 @@ import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.TilePane
@@ -42,6 +41,8 @@ class GameController : Initializable
     private val passedPlayers = mutableSetOf<Int>()
     private var moveType = 0
     private var straightSize = 0
+    private var winner = -1
+    private var ranking = 1
 
     @FXML
     private lateinit var cardTilePane: TilePane
@@ -470,6 +471,8 @@ class GameController : Initializable
 
         updateTurnLabel()
         updateViewDeck()
+
+        invalidPlayLabel.text = "Round complete! Player ${currentPlayerIndex+1} begins next round now."
     }
 
 
@@ -513,6 +516,9 @@ class GameController : Initializable
                 playedCards.add(card)
                 playerHands[currentPlayerIndex].remove(card)
                 selectedCard = null
+
+                if (playerHands[currentPlayerIndex].size == 0)
+                    winner = currentPlayerIndex+1
 
                 do {
                     currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -589,6 +595,9 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedPairCards)
             selectedPairCards.clear()
 
+            if (playerHands[currentPlayerIndex].size == 0)
+                winner = currentPlayerIndex+1
+
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
             } while (currentPlayerIndex in passedPlayers)
@@ -658,6 +667,9 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedStraightCards)
             selectedStraightCards.clear()
 
+            if (playerHands[currentPlayerIndex].size == 0)
+                winner = currentPlayerIndex+1
+
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
             } while (currentPlayerIndex in passedPlayers)
@@ -711,6 +723,9 @@ class GameController : Initializable
             playedCards.addAll(selectedTripletCards)
             playerHands[currentPlayerIndex].removeAll(selectedTripletCards)
             selectedTripletCards.clear()
+
+            if (playerHands[currentPlayerIndex].size == 0)
+                winner = currentPlayerIndex+1
 
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -768,6 +783,9 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedQuadCards)
             selectedQuadCards.clear()
 
+            if (playerHands[currentPlayerIndex].size == 0)
+                winner = currentPlayerIndex+1
+
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
             } while (currentPlayerIndex in passedPlayers)
@@ -785,6 +803,19 @@ class GameController : Initializable
         else
         {
             invalidPlayLabel.text = "Error: No cards selected."
+        }
+
+        // if a player has won, display a message saying so
+        if (winner > 0) {
+            val suffix = when (ranking) {
+                1 -> "st"
+                2 -> "nd"
+                3 -> "rd"
+                else -> "th"
+            }
+            invalidPlayLabel.text = "Player $winner wins $ranking$suffix place!"
+            ranking++
+            winner = -1
         }
     }
 
