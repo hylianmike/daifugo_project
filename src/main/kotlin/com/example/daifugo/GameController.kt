@@ -13,6 +13,8 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
+import javafx.animation.TranslateTransition
+import javafx.util.Duration
 
 class GameController : Initializable
 {
@@ -117,18 +119,29 @@ class GameController : Initializable
         setButtonPressedColour(singlesButton)
         cardTilePane.children.clear()
         val currentHand = playerHands[currentPlayerIndex]
+        invalidPlayLabel.text = ""
 
-        currentHand.forEach { card ->
+        currentHand.forEachIndexed { index, card ->
             val imageView = ImageView(card.image)
             imageView.fitHeight = 100.0
             imageView.isPreserveRatio = true
 
-            // mouse click event for cards
-            imageView.setOnMouseClicked { event ->
-                selectedCard?.let {
+            imageView.translateX = 800.0
+
+            // animation
+            val transition = TranslateTransition(Duration.millis(400.0), imageView)
+            transition.fromX = 800.0
+            transition.toX = 0.0
+            transition.delay = Duration.millis(75.0 * index)
+            transition.play()
+
+            // most click event for cards
+            imageView.setOnMouseClicked{
+                //deselect
+                selectedCard?.let{
                     deselectCard(it, 1)
                 }
-
+                // select
                 selectedCard = card
                 selectCard(card, 1)
             }
@@ -143,31 +156,44 @@ class GameController : Initializable
     @FXML
     fun twoOfAKindButtonPress(event: ActionEvent)
     {
-        selectedPairCards.clear() // Clear any previously selected cards
+        selectedPairCards.clear()
         currentScreen = 2
         setButtonPressedColour(twoOfAKindButton)
         cardTilePane.children.clear()
+        invalidPlayLabel.text = ""
 
         val currentHand = playerHands[currentPlayerIndex]
         val pairs = currentHand.groupBy { it.value }.filter { it.value.size >= 2 }
+        var index = 0
 
-        pairs.forEach { (value, cards) ->
-            if (cards.size >= 2) {
-                for (i in 0 until 2) {
+        pairs.forEach { (_, cards) ->
+            if (cards.size >= 2)
+            {
+                for (i in 0 until 2)
+                {
                     val card = cards[i]
                     val imageView = ImageView(card.image)
+
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+
+                    // animation
+                    val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
 
                     // mouse click event for cards
-                    imageView.setOnMouseClicked { event ->
+                    imageView.setOnMouseClicked {
                         // deselect
                         if (selectedPairCards.contains(card))
                         {
                             deselectCard(card, 2)
                             selectedPairCards.remove(card)
                         }
-                        // select card if 2 are not already selected
+                        // select
                         else if (selectedPairCards.size < 2)
                         {
                             selectCard(card, 2)
@@ -176,10 +202,12 @@ class GameController : Initializable
                     }
 
                     cardTilePane.children.add(imageView)
+                    index++
                 }
             }
         }
     }
+
 
     /**
      * Display all straights on button press that are at least 3 in length
@@ -191,11 +219,13 @@ class GameController : Initializable
         setButtonPressedColour(straightsButton)
         cardTilePane.children.clear()
         selectedStraightCards.clear()
+        invalidPlayLabel.text = ""
 
         val currentHand = playerHands[currentPlayerIndex]
         val uniqueValues = currentHand.map { it.value }.distinct()
         val straights = mutableListOf<List<Card>>()
         var currentStraight = mutableListOf<Card>()
+        var index = 0
 
         for (i in uniqueValues.indices)
         {
@@ -223,6 +253,14 @@ class GameController : Initializable
                 val imageView = ImageView(card.image)
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
+                imageView.translateX = 800.0
+
+                // animation
+                val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                transition.fromX = 800.0
+                transition.toX = 0.0
+                transition.delay = Duration.millis(75.0 * index)
+                transition.play()
 
                 // mouse click event for cards
                 imageView.setOnMouseClicked {
@@ -241,6 +279,7 @@ class GameController : Initializable
                 }
 
                 cardTilePane.children.add(imageView)
+                index++
             }
         }
     }
@@ -254,11 +293,12 @@ class GameController : Initializable
         currentScreen = 4
         setButtonPressedColour(threeOfAKindButton)
         cardTilePane.children.clear()
-
         selectedTripletCards.clear()
+        invalidPlayLabel.text = ""
 
         val currentHand = playerHands[currentPlayerIndex]
         val triplets = currentHand.groupBy { it.value }.filter { it.value.size >= 3 }
+        var index = 0
 
         triplets.forEach { (_, cards) ->
             for (i in 0 until 3) {
@@ -266,6 +306,14 @@ class GameController : Initializable
                 val imageView = ImageView(card.image)
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
+                imageView.translateX = 800.0
+
+                // animation
+                val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                transition.fromX = 800.0
+                transition.toX = 0.0
+                transition.delay = Duration.millis(75.0 * index)
+                transition.play()
 
                 // mouse click event for cards
                 imageView.setOnMouseClicked {
@@ -284,6 +332,7 @@ class GameController : Initializable
                 }
 
                 cardTilePane.children.add(imageView)
+                index++
             }
         }
     }
@@ -298,9 +347,11 @@ class GameController : Initializable
         setButtonPressedColour(fourOfAKindButton)
         cardTilePane.children.clear()
         selectedQuadCards.clear()
+        invalidPlayLabel.text = ""
 
         val currentHand = playerHands[currentPlayerIndex]
         val quads = currentHand.groupBy { it.value }.filter { it.value.size >= 4 }
+        var index = 0
 
         quads.forEach { (_, cards) ->
             for (i in 0 until 4) {
@@ -308,6 +359,14 @@ class GameController : Initializable
                 val imageView = ImageView(card.image)
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
+                imageView.translateX = 800.0
+
+                // animation
+                val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                transition.fromX = 800.0
+                transition.toX = 0.0
+                transition.delay = Duration.millis(75.0 * index)
+                transition.play()
 
                 // mouse click event for cards
                 imageView.setOnMouseClicked {
@@ -326,6 +385,7 @@ class GameController : Initializable
                 }
 
                 cardTilePane.children.add(imageView)
+                index++
             }
         }
     }
@@ -347,15 +407,27 @@ class GameController : Initializable
         setButtonPressedColour(viewDeckButton)
         currentScreen = 0
         cardTilePane.children.clear()
+        val animationDuration = Duration.millis(400.0)
         invalidPlayLabel.text = ""
 
         // singles round
-        if (moveType == 1) {  // Single card
+        if (moveType == 1)
+        {
             val lastPlayedCard = playedCards.lastOrNull()
-            if (lastPlayedCard != null) {
+
+            if (lastPlayedCard != null)
+            {
                 val imageView = ImageView(lastPlayedCard.image)
                 imageView.fitHeight = 100.0
                 imageView.isPreserveRatio = true
+                imageView.translateX = 800.0
+
+                // animation
+                val transition = TranslateTransition(animationDuration, imageView)
+                transition.fromX = 800.0
+                transition.toX = 0.0
+                transition.play()
+
                 cardTilePane.children.add(imageView)
             }
         }
@@ -365,10 +437,19 @@ class GameController : Initializable
             if (playedCards.size >= 2)
             {
                 val lastPlayedPair = playedCards.takeLast(2)
-                lastPlayedPair.forEach { card ->
+                lastPlayedPair.forEachIndexed { index, card ->
                     val imageView = ImageView(card.image)
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+
+                    // animation
+                    val transition = TranslateTransition(animationDuration, imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
+
                     cardTilePane.children.add(imageView)
                 }
             }
@@ -380,10 +461,19 @@ class GameController : Initializable
             {
                 val lastPlayedStraight = playedCards.takeLast(straightSize).sortedBy { valueOrder.indexOf(it.value) }
 
-                lastPlayedStraight.forEach { card ->
+                lastPlayedStraight.forEachIndexed() { index, card ->
                     val imageView = ImageView(card.image)
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+
+                    // animation
+                    val transition = TranslateTransition(animationDuration, imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
+
                     cardTilePane.children.add(imageView)
                 }
             }
@@ -395,10 +485,19 @@ class GameController : Initializable
             {
                 val lastPlayedTriplet = playedCards.takeLast(3)
 
-                lastPlayedTriplet.forEach { card ->
+                lastPlayedTriplet.forEachIndexed() { index, card ->
                     val imageView = ImageView(card.image)
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+
+                    // animation
+                    val transition = TranslateTransition(animationDuration, imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
+
                     cardTilePane.children.add(imageView)
                 }
             }
@@ -410,17 +509,28 @@ class GameController : Initializable
             {
                 val lastPlayedQuad = playedCards.takeLast(4)
 
-                lastPlayedQuad.forEach { card ->
+                lastPlayedQuad.forEachIndexed() { index, card ->
                     val imageView = ImageView(card.image)
                     imageView.fitHeight = 100.0
                     imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+
+                    // animation
+                    val transition = TranslateTransition(animationDuration, imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
+
                     cardTilePane.children.add(imageView)
                 }
             }
         }
 
-        for (card in playedCards){
-            when(card.suit){
+        for (card in playedCards)
+        {
+            when(card.suit)
+            {
                 "spades" -> spadeCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
                 "clubs" -> clubCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
                 "hearts" -> heartCards.children[valueOrder.indexOf(card.value)].opacity = 0.25
