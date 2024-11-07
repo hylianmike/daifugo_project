@@ -634,7 +634,7 @@ class GameController : Initializable
                 selectedCard = null
 
                 if (playerHands[currentPlayerIndex].size == 0)
-                    winner = currentPlayerIndex+1
+                    winner = currentPlayerIndex
 
                 do {
                     currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -712,7 +712,7 @@ class GameController : Initializable
             selectedPairCards.clear()
 
             if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex+1
+                winner = currentPlayerIndex
 
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -784,7 +784,7 @@ class GameController : Initializable
             selectedStraightCards.clear()
 
             if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex+1
+                winner = currentPlayerIndex
 
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -841,7 +841,7 @@ class GameController : Initializable
             selectedTripletCards.clear()
 
             if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex+1
+                winner = currentPlayerIndex
 
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -900,7 +900,7 @@ class GameController : Initializable
             selectedQuadCards.clear()
 
             if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex+1
+                winner = currentPlayerIndex
 
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
@@ -922,14 +922,14 @@ class GameController : Initializable
         }
 
         // if a player has won, display a message saying so
-        if (winner > 0) {
+        if (winner >= 0) {
             val suffix = when (ranking) {
                 1 -> "st"
                 2 -> "nd"
                 3 -> "rd"
                 else -> "th"
             }
-            invalidPlayLabel.text = "Player $winner wins $ranking$suffix place!"
+            invalidPlayLabel.text = "${playerNames[winner]} wins $ranking$suffix place!"
             ranking++
             winner = -1
         }
@@ -1030,8 +1030,6 @@ class GameController : Initializable
             opacity = 0.8
         }
 
-        // return count of how many cards have been selected
-        val innershadowCount = cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") }
         // If the number of cards with the inner shadow effect is less than the total cards to be played, remove the greyed-out effect
         if (cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") } < cardsToPlayCount) {
             cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
