@@ -46,6 +46,8 @@ class GameController : Initializable
     private var winner = -1
     private var ranking = 1
 
+    private lateinit var playerNames: List<String>
+
     @FXML
     private lateinit var cardTilePane: TilePane
 
@@ -89,7 +91,7 @@ class GameController : Initializable
      * Update text for who's turn it is
      */
     private fun updateTurnLabel() {
-        turnLabel.text = "Player ${currentPlayerIndex + 1}'s Turn"
+        turnLabel.text = "${playerNames[currentPlayerIndex]}'s Turn"
     }
 
     @FXML
@@ -586,7 +588,7 @@ class GameController : Initializable
         updateTurnLabel()
         updateViewDeck()
 
-        invalidPlayLabel.text = "Round complete! Player ${currentPlayerIndex+1} begins next round now."
+        invalidPlayLabel.text = "Round complete! ${playerNames[currentPlayerIndex]} begins next round now."
     }
 
 
@@ -941,6 +943,7 @@ class GameController : Initializable
     {
         invalidPlayLabel.text = ""
         setButtonPressedColour(viewDeckButton)
+        playerNames = listOf("Player 1", "Player 2", "Player 3", "Player 4")
         updateTurnLabel()
         val resourcePath = javaClass.getResource("/com/example/daifugo/Cards")
 
@@ -1035,6 +1038,11 @@ class GameController : Initializable
                     it.opacity = 1.0
             }
         }
+    }
+
+    fun setPlayerNames(p1Name: String, p2Name: String, p3Name: String, p4Name: String){
+        playerNames = listOf(p1Name.ifEmpty { "Player 1" }, p2Name.ifEmpty { "Player 2" }, p3Name.ifEmpty { "Player 3" }, p4Name.ifEmpty { "Player 4" })
+        updateTurnLabel()
     }
 }
 
