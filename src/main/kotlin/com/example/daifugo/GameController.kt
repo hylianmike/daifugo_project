@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import javafx.animation.TranslateTransition
+import javafx.scene.paint.Color
 import javafx.util.Duration
 
 class GameController : Initializable
@@ -43,8 +44,9 @@ class GameController : Initializable
     private val passedPlayers = mutableSetOf<Int>()
     private var moveType = 0
     private var straightSize = 0
-    private var winner = -1
+    private var winningPlayerIndex = -1
     private var ranking = 1
+    private val winners = mutableListOf<Int>()
 
     private lateinit var playerNames: List<String>
 
@@ -551,7 +553,12 @@ class GameController : Initializable
     @FXML
     fun passButtonPress(event: ActionEvent?)
     {
-        if (currentPlayerIndex !in passedPlayers)
+        if (playedCards.isEmpty())
+        {
+            invalidPlayLabel.text = "Error: You cannot pass at the start of a round."
+            invalidPlayLabel.textFill = Color.web("#FF1100")
+        }
+        else if (currentPlayerIndex !in passedPlayers)
         {
             passedPlayers.add(currentPlayerIndex)
             passedPlayersCount++
@@ -562,10 +569,7 @@ class GameController : Initializable
                 return
             }
 
-            do {
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-            } while (currentPlayerIndex in passedPlayers)
-
+            updateCurrentPlayerIndex()
             updateTurnLabel()
             updateViewDeck()
         }
@@ -577,7 +581,11 @@ class GameController : Initializable
      */
     private fun endRound()
     {
-        currentPlayerIndex = (0 until playerHands.size).first { it !in passedPlayers }
+        // update the currentPlayerIndex to reflect who will start the next round
+        if (passedPlayers.size == 4)
+            currentPlayerIndex = winners.last() + 1
+        else
+            currentPlayerIndex = (0 until playerHands.size).first { it !in passedPlayers }
 
         playedCards.clear()
         passedPlayers.clear()
@@ -585,10 +593,15 @@ class GameController : Initializable
         moveType = 0
         straightSize = 0
 
+        // if a player has won, they remain in the list of passedPlayers for the rest of the program, so their turn is always skipped
+        passedPlayers.addAll(winners)
+        passedPlayersCount += winners.size
+
         updateTurnLabel()
         updateViewDeck()
 
         invalidPlayLabel.text = "Round complete! ${playerNames[currentPlayerIndex]} begins next round now."
+        invalidPlayLabel.textFill = Color.web("#FAFFFA")
     }
 
 
@@ -607,12 +620,14 @@ class GameController : Initializable
             if (moveType == 2 || moveType == 3 || moveType == 4 || moveType == 5)
             {
                 invalidPlayLabel.text = "Error: You can't play a single."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
             if (selectedCard == null)
             {
                 invalidPlayLabel.text = "Error: No cards selected."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -622,6 +637,7 @@ class GameController : Initializable
                     val lastPlayedCard = playedCards.last()
                     if (card <= lastPlayedCard) {
                         invalidPlayLabel.text = "Error: You must play a higher card."
+                        invalidPlayLabel.textFill = Color.web("#FF1100")
                         return
                     }
                 }
@@ -633,13 +649,8 @@ class GameController : Initializable
                 playerHands[currentPlayerIndex].remove(card)
                 selectedCard = null
 
-                if (playerHands[currentPlayerIndex].size == 0)
-                    winner = currentPlayerIndex
-
-                do {
-                    currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-                } while (currentPlayerIndex in passedPlayers)
-
+                checkForWinner()
+                updateCurrentPlayerIndex()
                 updateTurnLabel()
                 setButtonPressedColour(viewDeckButton)
                 updateViewDeck()
@@ -651,12 +662,14 @@ class GameController : Initializable
             if (moveType == 1 || moveType == 3 || moveType == 4 || moveType == 5)
             {
                 invalidPlayLabel.text = "Error: You can't play two of a kind"
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
             if (selectedPairCards.size != 2)
             {
                 invalidPlayLabel.text = "Error: Two cards must be selected."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -665,6 +678,7 @@ class GameController : Initializable
             if (card1.value != card2.value)
             {
                 invalidPlayLabel.text = "Error: Cards are not the same."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -681,6 +695,7 @@ class GameController : Initializable
                 if (selectedValueIndex < lastPlayedValueIndex)
                 {
                     invalidPlayLabel.text = "Error: You must play a higher pair."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
                     return
                 }
 
@@ -698,6 +713,7 @@ class GameController : Initializable
 
                     if (selectedHighestSuitIndex < lastPlayedHighestSuitIndex) {
                         invalidPlayLabel.text = "Error: You must play a higher pair."
+                        invalidPlayLabel.textFill = Color.web("#FF1100")
                         return
                     }
                 }
@@ -711,13 +727,8 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedPairCards)
             selectedPairCards.clear()
 
-            if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex
-
-            do {
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-            } while (currentPlayerIndex in passedPlayers)
-
+            checkForWinner()
+            updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
         }
@@ -727,12 +738,14 @@ class GameController : Initializable
             if (moveType == 2 || moveType == 1 || moveType == 4 || moveType == 5)
             {
                 invalidPlayLabel.text = "Error: You can't play a straight."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
             if (selectedStraightCards.size < 3)
             {
                 invalidPlayLabel.text = "Error: At least three cards must be selected."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -746,6 +759,7 @@ class GameController : Initializable
                 if (nextIndex != currentIndex + 1)
                 {
                     invalidPlayLabel.text = "Error: Selected cards do not form a valid straight."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
                     return
                 }
             }
@@ -755,6 +769,7 @@ class GameController : Initializable
                 if (selectedStraightCards.size != straightSize)
                 {
                     invalidPlayLabel.text = "Error: Straight must be the same size as the deck."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
                     return
                 }
 
@@ -770,6 +785,7 @@ class GameController : Initializable
                     if (selectedValueIndex < lastValueIndex || (selectedValueIndex == lastValueIndex && suitOrder.indexOf(selectedHighestCard.suit) <= suitOrder.indexOf(lastHighestCard.suit)))
                     {
                         invalidPlayLabel.text = "Error: You must play a higher value straight."
+                        invalidPlayLabel.textFill = Color.web("#FF1100")
                         return
                     }
                 }
@@ -783,13 +799,8 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedStraightCards)
             selectedStraightCards.clear()
 
-            if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex
-
-            do {
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-            } while (currentPlayerIndex in passedPlayers)
-
+            checkForWinner()
+            updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
         }
@@ -799,12 +810,14 @@ class GameController : Initializable
             if (moveType == 2 || moveType == 3 || moveType == 1 || moveType == 5)
             {
                 invalidPlayLabel.text = "Error: You can't play three of a kind."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
             if (selectedTripletCards.size != 3)
             {
                 invalidPlayLabel.text = "Error: Three cards must be selected."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -813,6 +826,7 @@ class GameController : Initializable
             if (!(card1.value == card2.value && card2.value == card3.value))
             {
                 invalidPlayLabel.text = "Error: All cards must have the same value."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -828,6 +842,7 @@ class GameController : Initializable
                 if (selectedValueIndex < lastPlayedValueIndex)
                 {
                     invalidPlayLabel.text = "Error: You must play a higher three of a kind."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
                     return
                 }
             }
@@ -840,13 +855,8 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedTripletCards)
             selectedTripletCards.clear()
 
-            if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex
-
-            do {
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-            } while (currentPlayerIndex in passedPlayers)
-
+            checkForWinner()
+            updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
 
@@ -857,12 +867,14 @@ class GameController : Initializable
             if (moveType == 2 || moveType == 3 || moveType == 4 || moveType == 1)
             {
                 invalidPlayLabel.text = "Error: You can't play four of a kind."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
             if (selectedQuadCards.size != 4)
             {
                 invalidPlayLabel.text = "Error: Four cards must be selected."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -871,6 +883,7 @@ class GameController : Initializable
             if (!(card1.value == card2.value && card2.value == card3.value && card3.value == card4.value))
             {
                 invalidPlayLabel.text = "Error: All cards must have the same value."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
                 return
             }
 
@@ -887,6 +900,7 @@ class GameController : Initializable
                 if (selectedValueIndex < lastPlayedValueIndex)
                 {
                     invalidPlayLabel.text = "Error: You must play a higher four of a kind."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
                     return
                 }
             }
@@ -899,13 +913,8 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedQuadCards)
             selectedQuadCards.clear()
 
-            if (playerHands[currentPlayerIndex].size == 0)
-                winner = currentPlayerIndex
-
-            do {
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
-            } while (currentPlayerIndex in passedPlayers)
-
+            checkForWinner()
+            updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
         }
@@ -919,19 +928,21 @@ class GameController : Initializable
         else
         {
             invalidPlayLabel.text = "Error: No cards selected."
+            invalidPlayLabel.textFill = Color.web("#FF1100")
         }
 
         // if a player has won, display a message saying so
-        if (winner >= 0) {
+        if (winningPlayerIndex >= 0) {
             val suffix = when (ranking) {
                 1 -> "st"
                 2 -> "nd"
                 3 -> "rd"
                 else -> "th"
             }
-            invalidPlayLabel.text = "${playerNames[winner]} wins $ranking$suffix place!"
+            invalidPlayLabel.text = "${playerNames[winningPlayerIndex]} wins $ranking$suffix place!"
+            invalidPlayLabel.textFill = Color.web("#FAFFFA")
             ranking++
-            winner = -1
+            winningPlayerIndex = -1
         }
     }
 
@@ -1009,11 +1020,9 @@ class GameController : Initializable
             opacity = 1.0
         }
 
-        // return count of how many cards have been selected
-        val innershadowCount = cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") }
         // if user has selected the number of cards for their play type (ex. they have selected 3 cards and are playing 3 of a kind),
         //  the non-selected cards become greyed out
-        if (innershadowCount >= cardsToPlayCount) {
+        if (cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") } >= cardsToPlayCount) {
             cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
                 it.opacity = 0.8
             }
@@ -1030,10 +1039,10 @@ class GameController : Initializable
             opacity = 0.8
         }
 
-        // If the number of cards with the inner shadow effect is less than the total cards to be played, remove the greyed-out effect
+        // If the number of cards selected is less than the total cards to be played, remove the greyed-out effect
         if (cardTilePane.children.filterIsInstance<ImageView>().count { it.style.contains("innershadow") } < cardsToPlayCount) {
             cardTilePane.children.filterIsInstance<ImageView>().filterNot { it.style.contains("innershadow") }.forEach {
-                    it.opacity = 1.0
+                it.opacity = 1.0
             }
         }
     }
@@ -1041,6 +1050,27 @@ class GameController : Initializable
     fun setPlayerNames(p1Name: String, p2Name: String, p3Name: String, p4Name: String){
         playerNames = listOf(p1Name.ifEmpty { "Player 1" }, p2Name.ifEmpty { "Player 2" }, p3Name.ifEmpty { "Player 3" }, p4Name.ifEmpty { "Player 4" })
         updateTurnLabel()
+    }
+
+    /**
+     * Updates currentPlayerIndex to the next player that: hasn't passed, and has > 0 cards
+     */
+    private fun updateCurrentPlayerIndex() {
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % playerHands.size
+        } while (currentPlayerIndex in passedPlayers)
+    }
+
+    /**
+     * If a player has 0 cards, they are added to the list of winners
+     */
+    private fun checkForWinner() {
+        if (playerHands[currentPlayerIndex].size == 0) {
+            winningPlayerIndex = currentPlayerIndex
+            winners.add(currentPlayerIndex)
+
+            passedPlayers.add(currentPlayerIndex)
+        }
     }
 }
 
