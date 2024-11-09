@@ -14,7 +14,11 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import javafx.animation.TranslateTransition
+import javafx.fxml.FXMLLoader
+import javafx.scene.Node
+import javafx.scene.Scene
 import javafx.scene.paint.Color
+import javafx.stage.Stage
 import javafx.util.Duration
 
 class GameController : Initializable
@@ -612,7 +616,7 @@ class GameController : Initializable
      * spades, clubs, diamonds, hearts
      */
     @FXML
-    fun playButtonPress(event: ActionEvent?)
+    fun playButtonPress(event: ActionEvent)
     {
         // singles
         if (currentScreen == 1)
@@ -649,7 +653,7 @@ class GameController : Initializable
                 playerHands[currentPlayerIndex].remove(card)
                 selectedCard = null
 
-                checkForWinner()
+                checkForWinner(event)
                 updateCurrentPlayerIndex()
                 updateTurnLabel()
                 setButtonPressedColour(viewDeckButton)
@@ -727,7 +731,7 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedPairCards)
             selectedPairCards.clear()
 
-            checkForWinner()
+            checkForWinner(event)
             updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
@@ -799,7 +803,7 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedStraightCards)
             selectedStraightCards.clear()
 
-            checkForWinner()
+            checkForWinner(event)
             updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
@@ -855,7 +859,7 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedTripletCards)
             selectedTripletCards.clear()
 
-            checkForWinner()
+            checkForWinner(event)
             updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
@@ -913,7 +917,7 @@ class GameController : Initializable
             playerHands[currentPlayerIndex].removeAll(selectedQuadCards)
             selectedQuadCards.clear()
 
-            checkForWinner()
+            checkForWinner(event)
             updateCurrentPlayerIndex()
             updateViewDeck()
             updateTurnLabel()
@@ -1064,13 +1068,32 @@ class GameController : Initializable
     /**
      * If a player has 0 cards, they are added to the list of winners
      */
-    private fun checkForWinner() {
+    private fun checkForWinner(event: ActionEvent) {
         if (playerHands[currentPlayerIndex].size == 0) {
             winningPlayerIndex = currentPlayerIndex
             winners.add(currentPlayerIndex)
 
             passedPlayers.add(currentPlayerIndex)
+
+            // end game if 3 players are out of cards
+            if (winners.size == 3) {
+                winners.add((0..3).first { it !in winners })
+                endGame(event)
+            }
         }
+    }
+
+    /**
+     * Switch scene to end
+     */
+    private fun endGame(event: ActionEvent) {
+        val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("end.fxml"))
+        val scene = Scene(fxmlLoader.load())
+        val controller: EndController = fxmlLoader.getController()
+        controller.setRankLabels(playerNames[winners[0]], playerNames[winners[1]], playerNames[winners[2]], playerNames[winners[3]])
+        val stage = (event.source as Node).scene.window as Stage
+        stage.scene = scene
+        stage.show()
     }
 }
 
