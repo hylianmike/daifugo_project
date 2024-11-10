@@ -9,7 +9,7 @@ import javafx.stage.Stage
 class GameApplication : Application()
 {
     override fun start(stage: Stage) {
-        val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("home.fxml"))
+        val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("lanGame.fxml"))
         val scene = Scene(fxmlLoader.load())
         val icon = Image("file:src/main/resources/com/example/daifugo/icon.png")
         stage.title = "Daifugo!"

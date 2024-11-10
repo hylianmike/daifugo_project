@@ -37,6 +37,11 @@ class EndController: Initializable {
         rankFourLabel.text = "#4: $fourth"
     }
 
+    fun lanSetRankLabels(first: String, second: String) {
+        rankOneLabel.text = "#1: $first"
+        rankTwoLabel.text = "#2: $second"
+    }
+
     fun playAgain(actionEvent: ActionEvent) {
         val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("home.fxml"))
         val scene = Scene(fxmlLoader.load())
