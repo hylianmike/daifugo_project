@@ -20,6 +20,9 @@ import kotlin.concurrent.thread
 class HomeController: Initializable
 {
     @FXML
+    private lateinit var playGameButton: Button
+
+    @FXML
     private lateinit var p1Field: TextField
 
     @FXML
@@ -55,13 +58,25 @@ class HomeController: Initializable
     @FXML
     fun playGame(actionEvent: ActionEvent)
     {
-        val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("game.fxml"))
-        val scene = Scene(fxmlLoader.load())
-        val controller: GameController = fxmlLoader.getController()
-        controller.setPlayerNames(p1Field.textProperty().value, p2Field.textProperty().value, p3Field.textProperty().value, p4Field.textProperty().value)
-        val stage = (actionEvent.source as Node).scene.window as Stage
-        stage.scene = scene
-        stage.show()
+        if(p1Field.text.isEmpty() || p2Field.text.isEmpty() || p3Field.text.isEmpty() || p4Field.text.isEmpty())
+        {
+            errorLabel.text = "Please enter all player names"
+            return
+        }
+        else {
+            val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("game.fxml"))
+            val scene = Scene(fxmlLoader.load())
+            val controller: GameController = fxmlLoader.getController()
+            controller.setPlayerNames(
+                p1Field.textProperty().value,
+                p2Field.textProperty().value,
+                p3Field.textProperty().value,
+                p4Field.textProperty().value
+            )
+            val stage = (actionEvent.source as Node).scene.window as Stage
+            stage.scene = scene
+            stage.show()
+        }
     }
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {}
@@ -82,12 +97,17 @@ class HomeController: Initializable
     @FXML
     fun lanHostLobbyButtonPress(event: ActionEvent)
     {
+        //hide the playgameButton
+        playGameButton.isVisible = false
+        lanJoinLobbyButton.isVisible = false
+
         println("Hosting lobby at $host:$port")
 
         try {
             // make server
             server = Server(port, this)
             server?.start()
+            errorLabel.text = "Server started on $host:$port"
             println("Server started on $host:$port")
             lanPlayersLabel.text = "1/4"
         }
