@@ -27,6 +27,7 @@
                   <Button fx:id="straightsButton" mnemonicParsing="false" onAction="#straightsButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Straights" />
                   <Button fx:id="threeOfAKindButton" mnemonicParsing="false" onAction="#threeOfAKindButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Three of a Kind" />
                   <Button fx:id="fourOfAKindButton" mnemonicParsing="false" onAction="#fourOfAKindButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Four of a Kind" />
+                  <Button fx:id="killAPiggyButton" mnemonicParsing="false" onAction="#killAPiggyButtonPress" style="-fx-padding: 10 20; -fx-font-size: 16;" text="Kill a Piggy" />
                </children>
                <BorderPane.margin>
                   <Insets />

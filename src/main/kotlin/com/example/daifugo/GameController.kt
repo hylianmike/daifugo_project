@@ -1,25 +1,25 @@
 package com.example.daifugo
 
+import javafx.animation.TranslateTransition
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.fxml.FXMLLoader
 import javafx.fxml.Initializable
+import javafx.scene.Node
+import javafx.scene.Scene
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.layout.TilePane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.TilePane
+import javafx.scene.paint.Color
+import javafx.stage.Stage
+import javafx.util.Duration
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import javafx.animation.TranslateTransition
-import javafx.fxml.FXMLLoader
-import javafx.scene.Node
-import javafx.scene.Scene
-import javafx.scene.paint.Color
-import javafx.stage.Stage
-import javafx.util.Duration
 
 class GameController : Initializable
 {
@@ -38,6 +38,7 @@ class GameController : Initializable
     private val selectedTripletCards = mutableListOf<Card>()
     private val selectedQuadCards = mutableListOf<Card>()
     private val selectedStraightCards = mutableListOf<Card>()
+    private val selectedPiggies = mutableListOf<Card>()
 
     private val playedCards = mutableListOf<Card>()
     private var currentPlayerIndex = 0
@@ -51,6 +52,8 @@ class GameController : Initializable
     private var winningPlayerIndex = -1
     private var ranking = 1
     private val winners = mutableListOf<Int>()
+    private var lastPiggyPlayed = -1
+    private val killedPlayers = mutableListOf<Int>()
 
     private lateinit var playerNames: List<String>
 
@@ -77,6 +80,9 @@ class GameController : Initializable
 
     @FXML
     private lateinit var threeOfAKindButton: Button
+
+    @FXML
+    private lateinit var killAPiggyButton: Button
 
     @FXML
     private lateinit var turnLabel: Label
@@ -403,6 +409,122 @@ class GameController : Initializable
     }
 
     /**
+     * Display all 4 of a kind and straight pairs of 3 or greater
+     */
+    @FXML
+    fun killAPiggyButtonPress(event: ActionEvent)
+    {
+        currentScreen = 6
+        setButtonPressedColour(killAPiggyButton)
+        cardTilePane.children.clear()
+        selectedPiggies.clear()
+        invalidPlayLabel.text = ""
+
+        val currentHand = playerHands[currentPlayerIndex]
+        val quads = currentHand.groupBy { it.value }.filter { it.value.size >= 4 }
+        val pairs = currentHand.groupBy { it.value }.filter { it.value.size >= 2 }
+        val pairValues = pairs.keys.sortedBy { valueOrder.indexOf(it) }
+
+        val straightsOfPairs = mutableListOf<List<Card>>()
+        var currentPairStraight = mutableListOf<Card>()
+
+        for (i in pairValues.indices)
+        {
+            val currentValue = pairValues[i]
+            val cards = pairs[currentValue] ?: continue
+
+            currentPairStraight.addAll(cards.take(2))
+
+            if (i == pairValues.lastIndex || valueOrder.indexOf(pairValues[i + 1]) != valueOrder.indexOf(currentValue) + 1)
+            {
+                if (currentPairStraight.size >= 6)
+                {
+                    straightsOfPairs.add(currentPairStraight.toList())
+                }
+                currentPairStraight.clear()
+            }
+        }
+
+        var index = 0
+
+        // four of a kind
+        quads.forEach { (_, cards) ->
+            for (i in 0 until 4)
+            {
+                val card = cards[i]
+                val imageView = ImageView(card.image)
+                imageView.fitHeight = 100.0
+                imageView.isPreserveRatio = true
+                imageView.translateX = 800.0
+                imageView.styleClass.add("card-image")
+
+                // animation
+                val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                transition.fromX = 800.0
+                transition.toX = 0.0
+                transition.delay = Duration.millis(75.0 * index)
+                transition.play()
+
+                // mouse click event for cards
+                imageView.setOnMouseClicked {
+                    // deselect
+                    if (selectedPiggies.contains(card))
+                    {
+                        deselectCard(card, 4)
+                        selectedPiggies.remove(card)
+                    }
+                    // select
+                    else if (selectedPiggies.size < 4)
+                    {
+                        selectedPiggies.add(card)
+                        selectCard(card, 4)
+                    }
+                }
+
+                cardTilePane.children.add(imageView)
+                index++
+            }
+        }
+
+        // Display straights of pairs
+        straightsOfPairs.forEach { straight ->
+            straight.forEach { card ->
+                val imageView = ImageView(card.image)
+                imageView.fitHeight = 100.0
+                imageView.isPreserveRatio = true
+                imageView.translateX = 800.0
+                imageView.styleClass.add("card-image")
+
+                // Animation
+                val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                transition.fromX = 800.0
+                transition.toX = 0.0
+                transition.delay = Duration.millis(75.0 * index)
+                transition.play()
+
+                // mouse click event for cards
+                imageView.setOnMouseClicked {
+                    // deselect
+                    if (selectedPiggies.contains(card))
+                    {
+                        deselectCard(card, 1)
+                        selectedPiggies.remove(card)
+                    }
+                    // select
+                    else
+                    {
+                        selectedPiggies.add(card)
+                        selectCard(card, 1)
+                    }
+                }
+
+                cardTilePane.children.add(imageView)
+                index++
+            }
+        }
+    }
+
+    /**
      * Display cards that have been played on button press
      */
     @FXML
@@ -538,6 +660,74 @@ class GameController : Initializable
                 }
             }
         }
+        // kill piggies move
+        else if (moveType == 6)
+        {
+            if (playedCards.size >= 6)
+            {
+                val lastPlayedCards = playedCards.takeLast(playedCards.size)
+                val quads = lastPlayedCards.groupBy { it.value }.filter { it.value.size >= 4 }
+
+                // 4 of kind check
+                if (quads.isNotEmpty())
+                {
+                    quads.values.first().take(4).forEachIndexed { index, card ->
+                        val imageView = ImageView(card.image)
+                        imageView.fitHeight = 100.0
+                        imageView.isPreserveRatio = true
+                        imageView.translateX = 800.0
+
+                        // animation
+                        val transition = TranslateTransition(animationDuration, imageView)
+                        transition.fromX = 800.0
+                        transition.toX = 0.0
+                        transition.delay = Duration.millis(75.0 * index)
+                        transition.play()
+
+                        cardTilePane.children.add(imageView)
+                    }
+                }
+                // straight pair check
+                else
+                {
+                    val pairGroups = lastPlayedCards.groupBy { it.value }.filter { it.value.size >= 2 }
+                    val pairValues = pairGroups.keys.sortedBy { valueOrder.indexOf(it) }
+
+                    var currentPairStraight = mutableListOf<Card>()
+
+                    for (i in pairValues.indices)
+                    {
+                        val currentValue = pairValues[i]
+                        val cards = pairGroups[currentValue] ?: continue
+                        currentPairStraight.addAll(cards.take(2))
+
+                        if (i == pairValues.lastIndex || valueOrder.indexOf(pairValues[i + 1]) != valueOrder.indexOf(currentValue) + 1)
+                        {
+                            if (currentPairStraight.size >= 6)
+                            {
+                                currentPairStraight.forEachIndexed { index, card ->
+                                    val imageView = ImageView(card.image)
+                                    imageView.fitHeight = 100.0
+                                    imageView.isPreserveRatio = true
+                                    imageView.translateX = 800.0
+
+                                    // animation
+                                    val transition = TranslateTransition(animationDuration, imageView)
+                                    transition.fromX = 800.0
+                                    transition.toX = 0.0
+                                    transition.delay = Duration.millis(75.0 * index)
+                                    transition.play()
+
+                                    cardTilePane.children.add(imageView)
+                                }
+                                break
+                            }
+                            currentPairStraight.clear()
+                        }
+                    }
+                }
+            }
+        }
 
         for (card in playedCards)
         {
@@ -585,11 +775,12 @@ class GameController : Initializable
      */
     private fun endRound()
     {
+
         // update the currentPlayerIndex to reflect who will start the next round
         if (passedPlayers.size == 4)
             currentPlayerIndex = winners.last() + 1
         else
-            currentPlayerIndex = (0 until playerHands.size).first { it !in passedPlayers }
+            currentPlayerIndex = (0 until playerHands.size).first { it !in passedPlayers && it !in killedPlayers }
 
         playedCards.clear()
         passedPlayers.clear()
@@ -600,6 +791,7 @@ class GameController : Initializable
         // if a player has won, they remain in the list of passedPlayers for the rest of the program, so their turn is always skipped
         passedPlayers.addAll(winners)
         passedPlayersCount += winners.size
+        passedPlayers.addAll(killedPlayers)
 
         updateTurnLabel()
         updateViewDeck()
@@ -647,6 +839,11 @@ class GameController : Initializable
                 }
 
                 // ALL CHECKS PASS //
+
+                if (card.value == "2")
+                {
+                    lastPiggyPlayed = currentPlayerIndex
+                }
 
                 moveType = 1
                 playedCards.add(card)
@@ -725,6 +922,11 @@ class GameController : Initializable
 
             // ALL CHECKS PASS //
 
+            if (card1.value == "2")
+            {
+                lastPiggyPlayed = currentPlayerIndex
+            }
+
             moveType = 2
 
             playedCards.addAll(selectedPairCards)
@@ -797,6 +999,11 @@ class GameController : Initializable
 
             // ALL CHECKS PASS //
 
+            if (selectedStraightCards.any { it.value == "2" })
+            {
+                lastPiggyPlayed = currentPlayerIndex
+            }
+
             moveType = 3
             straightSize = selectedStraightCards.size
             playedCards.addAll(selectedStraightCards)
@@ -808,6 +1015,7 @@ class GameController : Initializable
             updateViewDeck()
             updateTurnLabel()
         }
+
         // triples
         else if (currentScreen == 4)
         {
@@ -852,6 +1060,11 @@ class GameController : Initializable
             }
 
             // ALL CHECKS PASS //
+
+            if (card1.value == "2")
+            {
+                lastPiggyPlayed = currentPlayerIndex
+            }
 
             moveType = 4
 
@@ -911,6 +1124,11 @@ class GameController : Initializable
 
             // ALL CHECKS PASS //
 
+            if (card1.value == "2")
+            {
+                lastPiggyPlayed = currentPlayerIndex
+            }
+
             moveType = 5
 
             playedCards.addAll(selectedQuadCards)
@@ -922,11 +1140,89 @@ class GameController : Initializable
             updateViewDeck()
             updateTurnLabel()
         }
-        // IF TIME PERMITS
+
         // kill piggy
         else if (currentScreen == 6)
         {
+            // if not enough cards are selected
+            if (selectedPiggies.size < 4 || selectedPiggies.size == 5)
+            {
+                invalidPlayLabel.text = "Error: Selected cards do not form a four of a kind or a pair of straights."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
+                return
+            }
+            // if four of a kind is invalid
+            if (selectedPiggies.size == 4)
+            {
+                val firstCard = selectedPiggies[0]
 
+                if (!selectedPiggies.all { it.value == firstCard.value })
+                {
+                    invalidPlayLabel.text = "Error: All four cards must have the same value."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
+                    return
+                }
+            }
+
+            // if straight of pairs is invalid
+            else if (selectedPiggies.size >= 6)
+            {
+                val pairGroups = selectedPiggies.groupBy { it.value }.filter { it.value.size >= 2 }
+
+                if (pairGroups.size < 3)
+                {
+                    invalidPlayLabel.text = "Error: Three pairs not selected."
+                    invalidPlayLabel.textFill = Color.web("#FF1100")
+                    return
+                }
+
+                val sortedPairValues = pairGroups.keys.sortedBy { valueOrder.indexOf(it) }
+
+                for (i in 0 until sortedPairValues.size - 1)
+                {
+                    val currentIndex = valueOrder.indexOf(sortedPairValues[i])
+                    val nextIndex = valueOrder.indexOf(sortedPairValues[i + 1])
+
+                    if (nextIndex != currentIndex + 1)
+                    {
+                        invalidPlayLabel.text = "Error: The selected cards do not form a valid straight of pairs."
+                        invalidPlayLabel.textFill = Color.web("#FF1100")
+                        return
+                    }
+                }
+            }
+            else
+            {
+                invalidPlayLabel.text = "Error: Selected cards do not form a four of a kind or a pair of straights."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
+                return
+            }
+
+
+
+            // kill a piggy if a 2 has been played
+            if (lastPiggyPlayed != -1)
+            {
+                passedPlayers.add(lastPiggyPlayed)
+                killedPlayers.add(lastPiggyPlayed)
+                passedPlayersCount++
+            }
+            else
+            {
+                invalidPlayLabel.text = "Error: A piggy is not in play."
+                invalidPlayLabel.textFill = Color.web("#FF1100")
+                return
+            }
+
+            moveType = 6
+            playedCards.addAll(selectedPiggies)
+            playerHands[currentPlayerIndex].removeAll(selectedPiggies)
+            selectedPiggies.clear()
+
+            checkForWinner(event)
+            updateCurrentPlayerIndex()
+            updateViewDeck()
+            updateTurnLabel()
         }
         // on deck screen
         else
@@ -997,7 +1293,7 @@ class GameController : Initializable
                 2 -> player3Hand.add(deck[i])
                 3 -> player4Hand.add(deck[i])
             }
-        }
+         }
 
         player1Hand.sort()
         player2Hand.sort()
@@ -1057,7 +1353,10 @@ class GameController : Initializable
     }
 
     /**
-     * Updates currentPlayerIndex to the next player that: hasn't passed, and has > 0 cards
+     * Updates currentPlayerIndex to the next player that:
+     * 1. hasn't passed
+     * 2. has > 0 cards
+     * 3. is not killed
      */
     private fun updateCurrentPlayerIndex() {
         do {
