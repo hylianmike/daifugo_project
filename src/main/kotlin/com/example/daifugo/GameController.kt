@@ -813,7 +813,7 @@ class GameController : Initializable
         // singles
         if (currentScreen == 1)
         {
-            if (moveType == 2 || moveType == 3 || moveType == 4 || moveType == 5)
+            if (moveType != 1 && moveType != 0)
             {
                 invalidPlayLabel.text = "Error: You can't play a single."
                 invalidPlayLabel.textFill = Color.web("#FF1100")
@@ -860,7 +860,7 @@ class GameController : Initializable
         // doubles
         else if (currentScreen == 2)
         {
-            if (moveType == 1 || moveType == 3 || moveType == 4 || moveType == 5)
+            if (moveType != 2 && moveType != 0)
             {
                 invalidPlayLabel.text = "Error: You can't play two of a kind"
                 invalidPlayLabel.textFill = Color.web("#FF1100")
@@ -941,7 +941,7 @@ class GameController : Initializable
         // straight
         else if (currentScreen == 3)
         {
-            if (moveType == 2 || moveType == 1 || moveType == 4 || moveType == 5)
+            if (moveType != 3 && moveType != 0)
             {
                 invalidPlayLabel.text = "Error: You can't play a straight."
                 invalidPlayLabel.textFill = Color.web("#FF1100")
@@ -1019,7 +1019,7 @@ class GameController : Initializable
         // triples
         else if (currentScreen == 4)
         {
-            if (moveType == 2 || moveType == 3 || moveType == 1 || moveType == 5)
+            if (moveType != 4 && moveType != 0)
             {
                 invalidPlayLabel.text = "Error: You can't play three of a kind."
                 invalidPlayLabel.textFill = Color.web("#FF1100")
@@ -1081,7 +1081,7 @@ class GameController : Initializable
         // quad
         else if (currentScreen == 5)
         {
-            if (moveType == 2 || moveType == 3 || moveType == 4 || moveType == 1)
+            if (moveType != 5 && moveType != 0)
             {
                 invalidPlayLabel.text = "Error: You can't play four of a kind."
                 invalidPlayLabel.textFill = Color.web("#FF1100")
