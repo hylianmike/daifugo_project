@@ -54,6 +54,7 @@ class GameController : Initializable
     private val winners = mutableListOf<Int>()
     private var lastPiggyPlayed = -1
     private val killedPlayers = mutableListOf<Int>()
+    private var kills = 0
 
     private lateinit var playerNames: List<String>
 
@@ -445,84 +446,95 @@ class GameController : Initializable
             }
         }
 
+        val displayedCards = mutableSetOf<Card>()
         var index = 0
 
-        // four of a kind
+        // display four of a kind
         quads.forEach { (_, cards) ->
             for (i in 0 until 4)
             {
                 val card = cards[i]
-                val imageView = ImageView(card.image)
-                imageView.fitHeight = 100.0
-                imageView.isPreserveRatio = true
-                imageView.translateX = 800.0
-                imageView.styleClass.add("card-image")
 
-                // animation
-                val transition = TranslateTransition(Duration.millis(400.0), imageView)
-                transition.fromX = 800.0
-                transition.toX = 0.0
-                transition.delay = Duration.millis(75.0 * index)
-                transition.play()
+                if (!displayedCards.contains(card))
+                {
+                    displayedCards.add(card)
+                    val imageView = ImageView(card.image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+                    imageView.styleClass.add("card-image")
 
-                // mouse click event for cards
-                imageView.setOnMouseClicked {
-                    // deselect
-                    if (selectedPiggies.contains(card))
-                    {
-                        deselectCard(card, 4)
-                        selectedPiggies.remove(card)
+                    // animation
+                    val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
+
+                    // mouse click event for cards
+                    imageView.setOnMouseClicked {
+                        // deselect
+                        if (selectedPiggies.contains(card))
+                        {
+                            deselectCard(card, 4)
+                            selectedPiggies.remove(card)
+                        }
+                        // select
+                        else if (selectedPiggies.size < 4)
+                        {
+                            selectedPiggies.add(card)
+                            selectCard(card, 4)
+                        }
                     }
-                    // select
-                    else if (selectedPiggies.size < 4)
-                    {
-                        selectedPiggies.add(card)
-                        selectCard(card, 4)
-                    }
+
+                    cardTilePane.children.add(imageView)
+                    index++
                 }
-
-                cardTilePane.children.add(imageView)
-                index++
             }
         }
 
-        // Display straights of pairs
+        // display straights of pairs
         straightsOfPairs.forEach { straight ->
             straight.forEach { card ->
-                val imageView = ImageView(card.image)
-                imageView.fitHeight = 100.0
-                imageView.isPreserveRatio = true
-                imageView.translateX = 800.0
-                imageView.styleClass.add("card-image")
+                if (!displayedCards.contains(card))
+                {
+                    displayedCards.add(card)
+                    val imageView = ImageView(card.image)
+                    imageView.fitHeight = 100.0
+                    imageView.isPreserveRatio = true
+                    imageView.translateX = 800.0
+                    imageView.styleClass.add("card-image")
 
-                // Animation
-                val transition = TranslateTransition(Duration.millis(400.0), imageView)
-                transition.fromX = 800.0
-                transition.toX = 0.0
-                transition.delay = Duration.millis(75.0 * index)
-                transition.play()
+                    // animation
+                    val transition = TranslateTransition(Duration.millis(400.0), imageView)
+                    transition.fromX = 800.0
+                    transition.toX = 0.0
+                    transition.delay = Duration.millis(75.0 * index)
+                    transition.play()
 
-                // mouse click event for cards
-                imageView.setOnMouseClicked {
-                    // deselect
-                    if (selectedPiggies.contains(card))
-                    {
-                        deselectCard(card, 1)
-                        selectedPiggies.remove(card)
+                    // mouse click event for cards
+                    imageView.setOnMouseClicked {
+                        // deselect
+                        if (selectedPiggies.contains(card))
+                        {
+                            deselectCard(card, 1)
+                            selectedPiggies.remove(card)
+                        }
+                        // select
+                        else
+                        {
+                            selectedPiggies.add(card)
+                            selectCard(card, 1)
+                        }
                     }
-                    // select
-                    else
-                    {
-                        selectedPiggies.add(card)
-                        selectCard(card, 1)
-                    }
+
+                    cardTilePane.children.add(imageView)
+                    index++
                 }
-
-                cardTilePane.children.add(imageView)
-                index++
             }
         }
     }
+
 
     /**
      * Display cards that have been played on button press
@@ -757,7 +769,7 @@ class GameController : Initializable
             passedPlayers.add(currentPlayerIndex)
             passedPlayersCount++
 
-            if (passedPlayersCount >= (playerHands.size - 1))
+            if (passedPlayersCount >= (playerHands.size - 1 - kills))
             {
                 endRound()
                 return
@@ -787,6 +799,7 @@ class GameController : Initializable
         passedPlayersCount = 0
         moveType = 0
         straightSize = 0
+        kills = killedPlayers.size
 
         // if a player has won, they remain in the list of passedPlayers for the rest of the program, so their turn is always skipped
         passedPlayers.addAll(winners)
