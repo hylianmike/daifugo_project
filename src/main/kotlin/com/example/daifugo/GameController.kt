@@ -769,7 +769,7 @@ class GameController : Initializable
             passedPlayers.add(currentPlayerIndex)
             passedPlayersCount++
 
-            if (passedPlayersCount >= (playerHands.size - 1 - kills))
+            if (passedPlayersCount == (3 - winners.size - kills))
             {
                 endRound()
                 return
@@ -803,7 +803,7 @@ class GameController : Initializable
 
         // if a player has won, they remain in the list of passedPlayers for the rest of the program, so their turn is always skipped
         passedPlayers.addAll(winners)
-        passedPlayersCount += winners.size
+        //passedPlayersCount += winners.size
         passedPlayers.addAll(killedPlayers)
 
         updateTurnLabel()
@@ -1380,15 +1380,18 @@ class GameController : Initializable
     /**
      * If a player has 0 cards, they are added to the list of winners
      */
-    private fun checkForWinner(event: ActionEvent) {
-        if (playerHands[currentPlayerIndex].size == 0) {
+    private fun checkForWinner(event: ActionEvent)
+    {
+        if (playerHands[currentPlayerIndex].size == 0)
+        {
             winningPlayerIndex = currentPlayerIndex
             winners.add(currentPlayerIndex)
 
             passedPlayers.add(currentPlayerIndex)
 
             // end game if 3 players are out of cards
-            if (winners.size == 3) {
+            if (winners.size == 3)
+            {
                 winners.add((0..3).first { it !in winners })
                 endGame(event)
             }
