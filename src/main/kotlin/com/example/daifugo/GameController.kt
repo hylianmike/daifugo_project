@@ -41,6 +41,8 @@ class GameController : Initializable
     private val selectedPiggies = mutableListOf<Card>()
 
     private val playedCards = mutableListOf<Card>()
+    private val listOfPlayedCards = mutableListOf<List<Card>>()
+    private val listOfPlayedCardsPlayers = mutableListOf<String>()
     private var currentPlayerIndex = 0
     private val playerHands = listOf(player1Hand, player2Hand, player3Hand, player4Hand)
     private var lastPressedButton: Button? = null
@@ -55,6 +57,7 @@ class GameController : Initializable
     private var lastPiggyPlayed = -1
     private val killedPlayers = mutableListOf<Int>()
     private var kills = 0
+    private var flag = false
 
     private lateinit var playerNames: List<String>
 
@@ -769,10 +772,14 @@ class GameController : Initializable
             passedPlayers.add(currentPlayerIndex)
             passedPlayersCount++
 
-            if (passedPlayersCount == (3 - winners.size - kills))
+            if (passedPlayersCount >= (3 - winners.size - kills))
             {
-                endRound()
-                return
+                if (!flag) {
+                    endRound()
+                    return
+                }
+                else
+                    flag = false
             }
 
             updateCurrentPlayerIndex()
@@ -943,6 +950,8 @@ class GameController : Initializable
             moveType = 2
 
             playedCards.addAll(selectedPairCards)
+            listOfPlayedCards.add(selectedPairCards.toMutableList())
+            listOfPlayedCardsPlayers.add(playerNames[currentPlayerIndex])
             playerHands[currentPlayerIndex].removeAll(selectedPairCards)
             selectedPairCards.clear()
 
@@ -1020,6 +1029,8 @@ class GameController : Initializable
             moveType = 3
             straightSize = selectedStraightCards.size
             playedCards.addAll(selectedStraightCards)
+            listOfPlayedCards.add(selectedStraightCards.toMutableList())
+            listOfPlayedCardsPlayers.add(playerNames[currentPlayerIndex])
             playerHands[currentPlayerIndex].removeAll(selectedStraightCards)
             selectedStraightCards.clear()
 
@@ -1082,6 +1093,8 @@ class GameController : Initializable
             moveType = 4
 
             playedCards.addAll(selectedTripletCards)
+            listOfPlayedCards.add(selectedTripletCards.toMutableList())
+            listOfPlayedCardsPlayers.add(playerNames[currentPlayerIndex])
             playerHands[currentPlayerIndex].removeAll(selectedTripletCards)
             selectedTripletCards.clear()
 
@@ -1145,6 +1158,8 @@ class GameController : Initializable
             moveType = 5
 
             playedCards.addAll(selectedQuadCards)
+            listOfPlayedCards.add(selectedQuadCards.toMutableList())
+            listOfPlayedCardsPlayers.add(playerNames[currentPlayerIndex])
             playerHands[currentPlayerIndex].removeAll(selectedQuadCards)
             selectedQuadCards.clear()
 
@@ -1229,6 +1244,8 @@ class GameController : Initializable
 
             moveType = 6
             playedCards.addAll(selectedPiggies)
+            listOfPlayedCards.add(selectedPiggies.toMutableList())
+            listOfPlayedCardsPlayers.add(playerNames[currentPlayerIndex])
             playerHands[currentPlayerIndex].removeAll(selectedPiggies)
             selectedPiggies.clear()
 
@@ -1386,6 +1403,7 @@ class GameController : Initializable
         {
             winningPlayerIndex = currentPlayerIndex
             winners.add(currentPlayerIndex)
+            flag = true
 
             passedPlayers.add(currentPlayerIndex)
 
@@ -1398,6 +1416,11 @@ class GameController : Initializable
         }
     }
 
+    val handComparator = compareBy<List<Card>>(
+        { it.size },
+        { it.maxOrNull() }
+    ).reversed()
+
     /**
      * Switch scene to end
      */
@@ -1406,6 +1429,9 @@ class GameController : Initializable
         val scene = Scene(fxmlLoader.load())
         val controller: EndController = fxmlLoader.getController()
         controller.setRankLabels(playerNames[winners[0]], playerNames[winners[1]], playerNames[winners[2]], playerNames[winners[3]])
+        val longestHands = listOfPlayedCards.filter { list -> list.size == listOfPlayedCards.maxOf { it.size } }
+        val playOfTheGame = longestHands.maxByOrNull { card -> card.sumOf { valueOrder.indexOf(it.value) } }
+        controller.setPlayOfTheGame(playOfTheGame, listOfPlayedCardsPlayers[listOfPlayedCards.indexOf(playOfTheGame)])
         val stage = (event.source as Node).scene.window as Stage
         stage.scene = scene
         stage.show()

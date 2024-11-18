@@ -4,6 +4,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -12,9 +14,14 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.GameController">
+<AnchorPane prefHeight="800.0" prefWidth="1000.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.GameController">
    <children>
-      <BorderPane prefHeight="800.0" prefWidth="1000.0" styleClass="main-border" stylesheets="@styles.css">
+      <ImageView fitHeight="830.0" fitWidth="1000.0" layoutY="-3.0" opacity="0.5" pickOnBounds="true">
+         <image>
+            <Image url="@table.jpg" />
+         </image>
+      </ImageView>
+      <BorderPane prefHeight="800.0" prefWidth="1000.0" stylesheets="@styles.css">
          <left>
             <VBox alignment="CENTER" prefHeight="500.0" prefWidth="175.0" spacing="30.0" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <children>
@@ -65,7 +72,7 @@
                <children>
                   <Label fx:id="turnLabel" alignment="CENTER" contentDisplay="TOP" stylesheets="@styles.css" text="Turn">
                      <font>
-                        <Font name="System Bold" size="32.0" />
+                        <Font name="Broadway" size="32.0" />
                      </font>
                      <HBox.margin>
                         <Insets right="200.0" />
@@ -78,12 +85,18 @@
                      <children>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="card-icon" text="SPADES" wrappingWidth="55.59375" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="card-icon" text="SPADES" textAlignment="CENTER" wrappingWidth="82.59375">
+                                 <font>
+                                    <Font name="Broadway" size="20.0" />
+                                 </font></Text>
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="card-icon" text="CLUBS" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="card-icon" text="CLUBS">
+                                 <font>
+                                    <Font name="Broadway" size="20.0" />
+                                 </font></Text>
                            </children>
                         </HBox>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
@@ -93,6 +106,9 @@
                                     <String fx:value="red-card" />
                                     <String fx:value="card-icon" />
                                  </styleClass>
+                                 <font>
+                                    <Font name="Broadway" size="20.0" />
+                                 </font>
                               </Text>
                            </children>
                         </HBox>
@@ -103,6 +119,9 @@
                                     <String fx:value="red-card" />
                                     <String fx:value="card-icon" />
                                  </styleClass>
+                                 <font>
+                                    <Font name="Broadway" size="20.0" />
+                                 </font>
                               </Text>
                            </children>
                         </HBox>

@@ -14,8 +14,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1000.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.HomeController">
+<AnchorPane prefHeight="800.0" prefWidth="1000.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.daifugo.HomeController">
    <children>
+      <ImageView fitHeight="800.0" fitWidth="1000.0" opacity="0.5" pickOnBounds="true">
+         <image>
+            <Image url="@table.jpg" />
+         </image>
+      </ImageView>
       <BorderPane layoutX="242.0" layoutY="208.0" prefHeight="800.0" prefWidth="1000.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
             <HBox BorderPane.alignment="CENTER" />
@@ -67,7 +72,7 @@
                         </Label>
                      </children>
                   </GridPane>
-                  <Label fx:id="errorLabel" text="Error Handling" textAlignment="CENTER" textFill="RED">
+                  <Label fx:id="errorLabel" textAlignment="CENTER" textFill="RED">
                      <font>
                         <Font name="System Italic" size="36.0" />
                      </font>

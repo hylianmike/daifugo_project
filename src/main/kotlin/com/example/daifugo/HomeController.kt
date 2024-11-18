@@ -58,25 +58,18 @@ class HomeController: Initializable
     @FXML
     fun playGame(actionEvent: ActionEvent)
     {
-        if(p1Field.text.isEmpty() || p2Field.text.isEmpty() || p3Field.text.isEmpty() || p4Field.text.isEmpty())
-        {
-            errorLabel.text = "Please enter all player names"
-            return
-        }
-        else {
-            val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("game.fxml"))
-            val scene = Scene(fxmlLoader.load())
-            val controller: GameController = fxmlLoader.getController()
-            controller.setPlayerNames(
-                p1Field.textProperty().value,
-                p2Field.textProperty().value,
-                p3Field.textProperty().value,
-                p4Field.textProperty().value
-            )
-            val stage = (actionEvent.source as Node).scene.window as Stage
-            stage.scene = scene
-            stage.show()
-        }
+        val fxmlLoader = FXMLLoader(GameApplication::class.java.getResource("game.fxml"))
+        val scene = Scene(fxmlLoader.load())
+        val controller: GameController = fxmlLoader.getController()
+        controller.setPlayerNames(
+            p1Field.textProperty().value,
+            p2Field.textProperty().value,
+            p3Field.textProperty().value,
+            p4Field.textProperty().value
+        )
+        val stage = (actionEvent.source as Node).scene.window as Stage
+        stage.scene = scene
+        stage.show()
     }
 
     override fun initialize(p0: URL?, p1: ResourceBundle?) {}
