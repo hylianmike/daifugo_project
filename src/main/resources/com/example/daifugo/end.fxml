@@ -51,35 +51,35 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </VBox.margin>
                      <font>
-                        <Font name="Broadway" size="28.0" />
+                        <Font name="Broadway" size="40.0" />
                      </font></Label>
                    <Label fx:id="rankOneLabel" text="#1: Player One" textFill="#ffd400">
                        <VBox.margin>
                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                        </VBox.margin>
                        <font>
-                           <Font name="Broadway" size="28.0" />
+                           <Font name="Broadway" size="40.0" />
                        </font></Label>
                    <Label fx:id="rankTwoLabel" text="#2: Player Three" textFill="#c3c3c3">
                        <VBox.margin>
                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                        </VBox.margin>
                        <font>
-                           <Font name="Broadway" size="28.0" />
+                           <Font name="Broadway" size="40.0" />
                        </font></Label>
                    <Label fx:id="rankThreeLabel" text="#3: Player Four" textFill="#d79d00">
                        <VBox.margin>
                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                        </VBox.margin>
                        <font>
-                           <Font name="Broadway" size="28.0" />
+                           <Font name="Broadway" size="40.0" />
                        </font></Label>
                    <Label fx:id="rankFourLabel" text="#4: Player Two" textFill="RED">
                        <VBox.margin>
                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                        </VBox.margin>
                        <font>
-                           <Font name="Broadway" size="28.0" />
+                           <Font name="Broadway" size="40.0" />
                        </font></Label>
                </children>
             </VBox>
@@ -89,13 +89,13 @@
                <children>
                   <Label style="-fx-text-fill: white;" text="Play Of The Game">
                      <font>
-                        <Font name="Broadway" size="28.0" />
+                        <Font name="Broadway" size="40.0" />
                      </font>
                   </Label>
-                  <TilePane fx:id="cardTilePane" alignment="CENTER" hgap="10.0" prefHeight="227.0" prefWidth="488.0" vgap="10.0" />
+                  <TilePane fx:id="cardTilePane" alignment="CENTER" hgap="10.0" prefHeight="326.0" prefWidth="488.0" vgap="10.0" />
                   <Label fx:id="playOfTheGamePlayer" style="-fx-text-fill: white;" text="By: ">
                      <font>
-                        <Font name="Broadway" size="28.0" />
+                        <Font name="Broadway" size="40.0" />
                      </font>
                   </Label>
                </children>
