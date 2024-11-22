@@ -32,17 +32,17 @@ We found out about the *Daifugo* card game during our time as 4th years during a
    ```
 2. To build and run the project in IntelliJ IDEA, you simply need to open the Main.kt file (src/main/kotlin/com/example/daifugo/Main.kt) and run the main() function:
 
-   *insert screenshot of play button in intellij beside the main function*
+   ![first method to run in IntelliJ](src/main/resources/com/example/daifugo/readme-assets/main_play_button.png)
    
    Or press the play button at the top of the IDE:
    
-   *insert screenshot of play button in intellij at the top of the IDE*
+   ![second method to run in IntelliJ](src/main/resources/com/example/daifugo/readme-assets/top_play_button.png)
 
 # Playing the Game
 ### Home scene
 *When the program launches, the Home scene is shown.*
 
-*insert annotated (with numbers) screenshot of the home scene pointing out the location of all the things described below*
+![the home scene](src/main/resources/com/example/daifugo/readme-assets/home_scene.png)
 
 1. *Daifugo* goes by many different names depending on your region.
 2. Inputs for the 4 players’ names.
@@ -52,7 +52,7 @@ We found out about the *Daifugo* card game during our time as 4th years during a
 ### Game scene
 *The Game scene is where the bulk of the game is played.*
 
-*insert annotated (with numbers) screenshot of the game scene pointing out the location of all the things described below*
+![the game scene](src/main/resources/com/example/daifugo/readme-assets/game_scene.png)
 
 1. Message informs the players who’s turn it is.
 2. Message shows what cards are yet to be played, greying out cards that have been played.
@@ -64,14 +64,14 @@ We found out about the *Daifugo* card game during our time as 4th years during a
 
 Once a player runs out of cards, they have won and an appropriate message is displayed.
 
-*insert screenshot of game scene with winning message highlighted*
+![the winning message](src/main/resources/com/example/daifugo/readme-assets/winning_message.png)
 
 Gameplay continues according to the game rules until all but one user has run out of cards, at which time the program advances to the end scene.
 
 ### End scene
 *The End scene is shown after the game is complete, displaying results of the game and options for starting a new one.*
 
-*insert annotated (with numbers) screenshot of the end scene pointing out the location of all the things described below*
+![the end scene](src/main/resources/com/example/daifugo/readme-assets/end_scene.png)
 
 1. Rankings are awarded based on the order that players won in.
 2. Play of the Game shows which player played the largest amount of cards at once, and what those cards were.
