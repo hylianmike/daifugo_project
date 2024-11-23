@@ -83,6 +83,7 @@ class HomeController: Initializable
     private var server: Server? = null
     private var client: Client? = null
     private var players = 1
+    private var hosting = false
 
     /**
      * On press, lobby is created
@@ -90,24 +91,42 @@ class HomeController: Initializable
     @FXML
     fun lanHostLobbyButtonPress(event: ActionEvent)
     {
-        //hide the playgameButton
-        playGameButton.isVisible = false
-        lanJoinLobbyButton.isVisible = false
+        if(!hosting) {
 
-        println("Hosting lobby at $host:$port")
+            println("Hosting lobby at $host:$port")
+            try {
+                // make server
+                server = Server(port, this)
+                server?.start()
+                errorLabel.text = "Server started on $host:$port"
+                println("Server started on $host:$port")
+                updatePlayersCount()
+            } catch (e: IOException) {
+                errorLabel.text = "Error starting server: ${e.message}"
+                println("Error starting server: ${e.message}")
+            }
 
-        try {
-            // make server
-            server = Server(port, this)
-            server?.start()
-            errorLabel.text = "Server started on $host:$port"
-            println("Server started on $host:$port")
-            lanPlayersLabel.text = "1/4"
+            //hide the playgameButton
+            playGameButton.isVisible = false
+            lanJoinLobbyButton.isVisible = false
+
+            //change the text of the host lobby button to "cancel hosting"
+            lanHostLobbyButton.text = "Cancel Hosting"
+
+
         }
-        catch (e: IOException) {
-            errorLabel.text = "Error starting server: ${e.message}"
-            println("Error starting server: ${e.message}")
+        else
+        {
+            //stop tha server and reset the UI
+            errorLabel.text = "Server stopped"
+            println("Server stopped")
+            lanPlayersLabel.text = "0/4"
+            players = 0
+            playGameButton.isVisible = true
+            lanJoinLobbyButton.isVisible = true
+            lanHostLobbyButton.text = "Host Lobby"
         }
+        hosting = !hosting
     }
 
     /**
